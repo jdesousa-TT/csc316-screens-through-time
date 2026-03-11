@@ -1,0 +1,860 @@
+/**
+ * Genre Playoffs
+ * Interactive bracket hook built from Netflix, Disney+, and Amazon Prime.
+ */
+
+const genrePlayoffPalette = {
+    'Drama': '#d9897b',
+    'Comedy': '#6fc4a7',
+    'Action': '#e3a34f',
+    'Kids & Family': '#f0cf6b',
+    'Thriller': '#88b84b',
+    'Documentary': '#8eb7d9',
+    'Animation': '#eb7aa4',
+    'Horror': '#6e7fd8'
+};
+
+function ensurePlayoffRuntimeStyles() {
+    if (document.getElementById('playoff-runtime-styles')) return;
+
+    const style = document.createElement('style');
+    style.id = 'playoff-runtime-styles';
+    style.textContent = `
+        .genre-playoffs-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .genre-playoffs-header.align-left {
+            justify-content: flex-start;
+        }
+
+        .genre-playoffs-intro {
+            text-align: left;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.9rem;
+            flex-wrap: wrap;
+            max-width: 820px;
+        }
+
+        .genre-playoffs-actions {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .genre-playoffs-actions.align-left {
+            justify-content: flex-start;
+        }
+
+        .genre-playoffs-button {
+            border: 1px solid rgba(26, 26, 26, 0.14);
+            border-radius: 999px;
+            background: #1a1a1a;
+            color: white;
+            padding: 0.6rem 1rem;
+            font-size: 0.84rem;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .genre-playoffs-button.secondary {
+            background: transparent;
+            color: var(--color-text);
+        }
+
+        .genre-playoffs-button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .genre-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: stretch;
+        }
+
+        .genre-pool-card {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.08rem;
+            min-width: 116px;
+            padding: 0.42rem 0.55rem;
+            border: 2px solid rgba(26, 26, 26, 0.08);
+            border-radius: 12px;
+            box-shadow: 0 5px 14px rgba(26, 26, 26, 0.08);
+            text-align: left;
+            cursor: grab;
+        }
+
+        .genre-pool-card:active {
+            cursor: grabbing;
+        }
+
+        .genre-playoffs-heading {
+            font-family: var(--font-display);
+            font-size: clamp(1.9rem, 3.8vw, 2.9rem);
+            line-height: 0.95;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .genre-playoffs-copy {
+            margin: 0;
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+        }
+
+        .genre-playoffs-footnote {
+            margin: 0;
+            font-size: 0.82rem;
+            color: var(--color-text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .genre-playoffs-intro {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .genre-playoffs-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .genre-playoffs-actions {
+                align-items: flex-start;
+                justify-content: flex-start;
+            }
+        }
+    `;
+
+    document.head.appendChild(style);
+}
+
+const genrePlayoffStructure = {
+    quarterfinals: [
+        { id: 'qf-1', side: 'left', pair: 1 },
+        { id: 'qf-2', side: 'left', pair: 1 },
+        { id: 'qf-3', side: 'left', pair: 2 },
+        { id: 'qf-4', side: 'left', pair: 2 },
+        { id: 'qf-5', side: 'right', pair: 3 },
+        { id: 'qf-6', side: 'right', pair: 3 },
+        { id: 'qf-7', side: 'right', pair: 4 },
+        { id: 'qf-8', side: 'right', pair: 4 }
+    ],
+    semifinals: [
+        { id: 'sf-1', side: 'left', source: ['qf-1', 'qf-2'] },
+        { id: 'sf-2', side: 'left', source: ['qf-3', 'qf-4'] },
+        { id: 'sf-3', side: 'right', source: ['qf-5', 'qf-6'] },
+        { id: 'sf-4', side: 'right', source: ['qf-7', 'qf-8'] }
+    ],
+    finals: [
+        { id: 'f-1', source: ['sf-1', 'sf-2'] },
+        { id: 'f-2', source: ['sf-3', 'sf-4'] }
+    ]
+};
+
+function initGenrePlayoffs() {
+    const container = d3.select('#viz-1');
+
+    if (container.empty()) return;
+    ensurePlayoffRuntimeStyles();
+
+    Promise.all([
+        d3.csv('data/netflix_titles.csv'),
+        d3.csv('data/disney_plus_titles.csv'),
+        d3.csv('data/amazon_prime_titles.csv')
+    ]).then(([netflixTitles, disneyTitles, amazonTitles]) => {
+        const stats = buildGenrePlayoffData([...netflixTitles, ...disneyTitles, ...amazonTitles]);
+        renderGenrePlayoffs(container, stats);
+    }).catch(error => {
+        console.error('Error loading genre playoff data:', error);
+        container.html('<p class="placeholder-text">Error loading genre playoffs</p>');
+    });
+}
+
+function buildGenrePlayoffData(rows) {
+    const counts = new Map();
+    const countriesByGenre = new Map();
+
+    rows.forEach(row => {
+        const genres = getNormalizedGenres(row.listed_in);
+        const countries = (row.country || '')
+            .split(',')
+            .map(country => country.trim())
+            .filter(Boolean);
+
+        genres.forEach(genre => {
+            counts.set(genre, (counts.get(genre) || 0) + 1);
+
+            if (!countriesByGenre.has(genre)) {
+                countriesByGenre.set(genre, new Map());
+            }
+
+            const genreCountries = countriesByGenre.get(genre);
+            countries.forEach(country => {
+                genreCountries.set(country, (genreCountries.get(country) || 0) + 1);
+            });
+        });
+    });
+
+    const selectedGenres = [
+        'Drama',
+        'Comedy',
+        'Action',
+        'Kids & Family',
+        'Thriller',
+        'Documentary',
+        'Animation',
+        'Horror'
+    ];
+
+    const seededGenres = selectedGenres
+        .map(genre => createGenreSummary(genre, counts.get(genre) || 0, countriesByGenre.get(genre) || new Map()))
+        .sort((a, b) => b.count - a.count)
+        .map((genre, index) => ({
+            ...genre,
+            seed: index + 1
+        }));
+
+    return {
+        genres: seededGenres,
+        byName: new Map(seededGenres.map(genre => [genre.genre, genre]))
+    };
+}
+
+function getNormalizedGenres(listedIn) {
+    const ignoredGenres = new Set([
+        'Arts',
+        'Entertainment',
+        'and Culture',
+        'Special Interest',
+        'TV Shows',
+        'International',
+        'International Movies',
+        'International TV Shows',
+        'Independent Movies'
+    ]);
+
+    const mapping = {
+        'Action-Adventure': 'Action',
+        'Action & Adventure': 'Action',
+        'Adventure': 'Action',
+        'Suspense': 'Thriller',
+        'Thrillers': 'Thriller',
+        'Science Fiction': 'Sci-Fi',
+        'Sci-Fi & Fantasy': 'Sci-Fi',
+        'Kids': 'Kids & Family',
+        'Family': 'Kids & Family',
+        'Children & Family Movies': 'Kids & Family',
+        'Dramas': 'Drama',
+        'TV Dramas': 'Drama',
+        'Comedies': 'Comedy',
+        'Documentaries': 'Documentary',
+        'Romantic Movies': 'Romance',
+        'Horror Movies': 'Horror',
+        'Anime Features': 'Animation',
+        'Anime Series': 'Animation'
+    };
+
+    return (listedIn || '')
+        .split(',')
+        .map(genre => genre.trim())
+        .filter(Boolean)
+        .map(genre => mapping[genre] || genre)
+        .filter(genre => !genre.includes('TV'))
+        .filter(genre => !genre.includes('Movies') || genre === 'Romance')
+        .filter(genre => !ignoredGenres.has(genre));
+}
+
+function createGenreSummary(genre, count, countryMap) {
+    const topCountries = Array.from(countryMap.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+        .map(([country, titles]) => ({ country, titles }));
+
+    return {
+        genre,
+        count,
+        color: genrePlayoffPalette[genre] || '#d6cec2',
+        topCountries,
+        countrySpread: countryMap.size
+    };
+}
+
+function pickWinner(first, second) {
+    return first.count >= second.count ? first : second;
+}
+
+function renderGenrePlayoffs(container, stats) {
+    container.html('');
+
+    const state = {
+        assignments: new Map(),
+        winners: {
+            semifinals: new Map(),
+            finals: new Map(),
+            champion: null
+        },
+        justRevealed: new Set(),
+        draggingGenre: null,
+        revealing: false,
+        randomizing: false
+    };
+
+    const shell = container.append('div')
+        .attr('class', 'genre-playoffs-shell');
+
+    const header = shell.append('div')
+        .attr('class', 'genre-playoffs-header align-left');
+
+    const intro = header.append('div')
+        .attr('class', 'genre-playoffs-intro');
+
+    const actions = header.append('div')
+        .attr('class', 'genre-playoffs-actions align-left');
+
+    const revealButton = actions.append('button')
+        .attr('type', 'button')
+        .attr('class', 'genre-playoffs-button')
+        .property('disabled', true)
+        .text('Reveal Winners');
+
+    const randomizeButton = actions.append('button')
+        .attr('type', 'button')
+        .attr('class', 'genre-playoffs-button secondary')
+        .text('Randomize Bracket');
+
+    const resetButton = actions.append('button')
+        .attr('type', 'button')
+        .attr('class', 'genre-playoffs-button secondary')
+        .text('Reset');
+
+    actions.append('p')
+        .attr('class', 'genre-playoffs-footnote')
+        .text('Hover for top countries.');
+
+    const pool = shell.append('div')
+        .attr('class', 'genre-pool');
+
+    const board = shell.append('div')
+        .attr('class', 'genre-playoffs-bracket interactive');
+
+    const connectorLayer = board.append('svg')
+        .attr('class', 'genre-playoffs-connectors');
+
+    const tooltip = d3.select('body')
+        .selectAll('.genre-playoff-tooltip')
+        .data([null])
+        .join('div')
+        .attr('class', 'genre-playoff-tooltip')
+        .style('opacity', 0);
+
+    const columns = [
+        { key: 'left-quarter', label: 'Quarterfinals', slots: genrePlayoffStructure.quarterfinals.filter(slot => slot.side === 'left') },
+        { key: 'left-semi', label: 'Semifinals', slots: genrePlayoffStructure.semifinals.filter(slot => slot.side === 'left') },
+        { key: 'center-final', label: 'Final', slots: genrePlayoffStructure.finals },
+        { key: 'right-semi', label: 'Semifinals', slots: genrePlayoffStructure.semifinals.filter(slot => slot.side === 'right') },
+        { key: 'right-quarter', label: 'Quarterfinals', slots: genrePlayoffStructure.quarterfinals.filter(slot => slot.side === 'right') }
+    ];
+
+    const columnSelection = board.selectAll('.genre-playoffs-column')
+        .data(columns)
+        .enter()
+        .append('div')
+        .attr('class', d => `genre-playoffs-column ${d.key}`);
+
+    columnSelection.append('div')
+        .attr('class', 'genre-playoffs-round-label')
+        .text(d => d.label);
+
+    columnSelection.each(function(column) {
+        d3.select(this).append('div')
+            .attr('class', `slot-stack ${column.key}`);
+    });
+
+    revealButton.on('click', async () => {
+        if (state.revealing || state.randomizing || !isBracketReady(state)) return;
+        state.revealing = true;
+        revealButton.property('disabled', true).text('Revealing...');
+        resetWinners(state);
+        renderBoard();
+        await revealRound('semifinals');
+        await revealRound('finals');
+        await revealChampion();
+        state.revealing = false;
+        revealButton.property('disabled', false).text('Replay Reveal');
+        renderBoard();
+    });
+
+    randomizeButton.on('click', async () => {
+        if (state.revealing || state.randomizing) return;
+
+        state.randomizing = true;
+        state.assignments.clear();
+        resetWinners(state);
+        revealButton.text('Reveal Winners');
+        renderBoard();
+        syncControls();
+
+        const assignmentEntries = shuffleArray(stats.genres.map(genre => genre.genre))
+            .map((genreName, index) => [genrePlayoffStructure.quarterfinals[index].id, genreName]);
+
+        await animateAssignmentsIntoSlots(assignmentEntries);
+
+        state.randomizing = false;
+        renderBoard();
+    });
+
+    resetButton.on('click', () => {
+        state.assignments.clear();
+        state.draggingGenre = null;
+        state.revealing = false;
+        state.randomizing = false;
+        resetWinners(state);
+        renderPool();
+        renderBoard();
+        revealButton.text('Reveal Winners');
+        syncControls();
+    });
+
+    function renderPool() {
+        const assignedGenres = new Set(state.assignments.values());
+        const available = stats.genres.filter(genre => !assignedGenres.has(genre.genre));
+
+        const cards = pool.selectAll('.genre-pool-card')
+            .data(available, d => d.genre);
+
+        cards.exit().remove();
+
+        const entered = cards.enter()
+            .append('button')
+            .attr('type', 'button')
+            .attr('class', 'genre-pool-card');
+
+        const merged = entered.merge(cards)
+            .attr('data-genre', d => d.genre)
+            .attr('draggable', state.revealing ? null : true)
+            .style('background-color', d => d.color)
+            .on('dragstart', (event, d) => {
+                if (state.revealing || state.randomizing) {
+                    event.preventDefault();
+                    return;
+                }
+                state.draggingGenre = d.genre;
+                event.dataTransfer.setData('text/plain', d.genre);
+            })
+            .on('dragend', () => {
+                state.draggingGenre = null;
+            })
+            .on('mouseenter', (event, d) => showTooltip(event, d))
+            .on('mousemove', moveTooltip)
+            .on('mouseleave', hideTooltip)
+            .on('focus', (event, d) => showTooltip(event, d))
+            .on('blur', hideTooltip);
+
+        merged.html('');
+        merged.append('span')
+            .attr('class', 'genre-playoff-name')
+            .text(d => d.genre);
+        merged.append('span')
+            .attr('class', 'genre-playoff-meta')
+            .text(d => `${d.countrySpread} countries`);
+    }
+
+    function renderBoard() {
+        renderQuarterfinals();
+        renderWinners('left-semi', genrePlayoffStructure.semifinals.filter(slot => slot.side === 'left'), state.winners.semifinals);
+        renderWinners('right-semi', genrePlayoffStructure.semifinals.filter(slot => slot.side === 'right'), state.winners.semifinals);
+        renderWinners('center-final', genrePlayoffStructure.finals, state.winners.finals);
+        renderChampionCallout();
+        renderPool();
+        syncControls();
+        requestAnimationFrame(drawConnectors);
+    }
+
+    function renderQuarterfinals() {
+        ['left-quarter', 'right-quarter'].forEach(columnKey => {
+            const slots = genrePlayoffStructure.quarterfinals.filter(slot => slot.side === (columnKey === 'left-quarter' ? 'left' : 'right'));
+            const stack = board.select(`.${columnKey}.slot-stack`);
+
+            const slotSelection = stack.selectAll('.genre-drop-slot')
+                .data(slots, d => d.id);
+
+            slotSelection.exit().remove();
+
+            const entered = slotSelection.enter()
+                .append('div')
+                .attr('class', 'genre-drop-slot');
+
+            const merged = entered.merge(slotSelection)
+                .attr('data-slot-id', d => d.id)
+                .classed('filled', d => state.assignments.has(d.id))
+                .classed('drag-over', false)
+                .on('dragover', function(event) {
+                    if (state.revealing || state.randomizing) return;
+                    event.preventDefault();
+                    d3.select(this).classed('drag-over', true);
+                })
+                .on('dragleave', function() {
+                    d3.select(this).classed('drag-over', false);
+                })
+                .on('drop', function(event, slot) {
+                    if (state.revealing || state.randomizing) return;
+                    event.preventDefault();
+                    d3.select(this).classed('drag-over', false);
+                    const genreName = event.dataTransfer.getData('text/plain') || state.draggingGenre;
+                    assignGenreToSlot(genreName, slot.id);
+                });
+
+            merged.html('');
+
+            merged.each(function(slot) {
+                const slotNode = d3.select(this);
+                const genreName = state.assignments.get(slot.id);
+
+                if (!genreName) {
+                    slotNode.append('div')
+                        .attr('class', 'genre-slot-placeholder')
+                        .text(`Drop genre ${slot.id.replace('qf-', '')}`);
+                    return;
+                }
+
+                const genre = stats.byName.get(genreName);
+                renderGenreCard(slotNode, genre, 'genre-playoff-card interactive', true, false);
+            });
+        });
+    }
+
+    function renderWinners(columnKey, slots, winnerMap) {
+        const stack = board.select(`.${columnKey}.slot-stack`);
+        const slotSelection = stack.selectAll('.genre-winner-slot')
+            .data(slots, d => d.id);
+
+        slotSelection.exit().remove();
+
+        const entered = slotSelection.enter()
+            .append('div')
+            .attr('class', 'genre-winner-slot');
+
+        const merged = entered.merge(slotSelection)
+            .attr('data-slot-id', d => d.id);
+
+        merged.html('');
+
+        merged.each(function(slot) {
+            const slotNode = d3.select(this);
+            const winnerName = winnerMap.get(slot.id);
+
+            if (!winnerName) {
+                slotNode.append('div')
+                    .attr('class', 'genre-slot-placeholder winner')
+                    .text(columnKey === 'center-final' ? 'Winner reveals here' : 'Winner reveals next');
+                return;
+            }
+
+            const genre = stats.byName.get(winnerName);
+            const revealClass = state.justRevealed.has(slot.id) ? ' revealed' : '';
+            renderGenreCard(slotNode, genre, `genre-playoff-card genre-playoff-card-finalist${revealClass}`, false, true);
+        });
+    }
+
+    function renderChampionCallout() {
+        board.select('.center-final.slot-stack').selectAll('.genre-playoffs-callout').remove();
+        if (!state.winners.champion) return;
+
+        const champion = stats.byName.get(state.winners.champion);
+        const callout = board.select('.center-final.slot-stack')
+            .append('div')
+            .attr('class', `genre-playoffs-callout${state.justRevealed.has('champion') ? ' revealed' : ''}`);
+
+        callout.append('span')
+            .attr('class', 'genre-playoffs-callout-label')
+            .text('Overall Winner');
+
+        callout.append('div')
+            .attr('class', 'genre-playoffs-callout-winner')
+            .text(champion.genre);
+
+        callout.append('p')
+            .attr('class', 'genre-playoffs-callout-copy')
+            .text(`${d3.format(',')(champion.count)} titles across ${champion.countrySpread} countries`);
+    }
+
+    function renderGenreCard(parent, genre, className, removable, showCount) {
+        const card = parent.append('button')
+            .attr('type', 'button')
+            .attr('class', className)
+            .attr('data-genre', genre.genre)
+            .style('background-color', genre.color)
+            .on('mouseenter', (event) => showTooltip(event, genre))
+            .on('mousemove', moveTooltip)
+            .on('mouseleave', hideTooltip)
+            .on('focus', (event) => showTooltip(event, genre))
+            .on('blur', hideTooltip);
+
+        if (removable && !state.revealing) {
+            card.attr('draggable', true)
+                .on('dragstart', (event) => {
+                    if (state.randomizing) {
+                        event.preventDefault();
+                        return;
+                    }
+                    state.draggingGenre = genre.genre;
+                    event.dataTransfer.setData('text/plain', genre.genre);
+                })
+                .on('dragend', () => {
+                    state.draggingGenre = null;
+                });
+        }
+
+        card.append('span')
+            .attr('class', 'genre-playoff-name')
+            .text(genre.genre);
+
+        card.append('span')
+            .attr('class', showCount ? 'genre-playoff-count' : 'genre-playoff-meta')
+            .text(showCount ? d3.format(',')(genre.count) : `${genre.countrySpread} countries`);
+
+        if (removable && !state.revealing) {
+            card.append('span')
+                .attr('class', 'genre-playoff-hint')
+                .text('Drag to move');
+        }
+    }
+
+    function assignGenreToSlot(genreName, slotId) {
+        if (!genreName || !stats.byName.has(genreName)) return;
+
+        resetWinners(state);
+
+        let previousSlot = null;
+        state.assignments.forEach((assignedGenre, assignedSlotId) => {
+            if (assignedGenre === genreName) previousSlot = assignedSlotId;
+        });
+
+        const displacedGenre = state.assignments.get(slotId);
+
+        if (previousSlot) {
+            state.assignments.delete(previousSlot);
+        }
+
+        state.assignments.set(slotId, genreName);
+
+        if (displacedGenre && previousSlot && displacedGenre !== genreName) {
+            state.assignments.set(previousSlot, displacedGenre);
+        }
+
+        renderBoard();
+    }
+
+    function syncControls() {
+        revealButton.property('disabled', !isBracketReady(state) || state.revealing || state.randomizing);
+        randomizeButton.property('disabled', state.revealing || state.randomizing);
+        resetButton.property('disabled', state.revealing || state.randomizing);
+    }
+
+    function showTooltip(event, genre) {
+        tooltip.html(buildTooltipHtml(genre)).style('opacity', 1);
+        moveTooltip(event);
+    }
+
+    function moveTooltip(event) {
+        const x = Math.min(event.pageX + 16, window.innerWidth - 280);
+        const y = Math.max(event.pageY - 28, 24);
+
+        tooltip.style('left', `${x}px`).style('top', `${y}px`);
+    }
+
+    function hideTooltip() {
+        tooltip.style('opacity', 0);
+    }
+
+    async function revealRound(roundName) {
+        const targets = roundName === 'semifinals'
+            ? genrePlayoffStructure.semifinals
+            : genrePlayoffStructure.finals;
+
+        for (const slot of targets) {
+            const winner = pickWinnerFromSlots(slot.source);
+            state.justRevealed.clear();
+            state.justRevealed.add(slot.id);
+            if (roundName === 'semifinals') {
+                state.winners.semifinals.set(slot.id, winner.genre);
+            } else {
+                state.winners.finals.set(slot.id, winner.genre);
+            }
+            renderBoard();
+            await delay(650);
+        }
+        state.justRevealed.clear();
+    }
+
+    async function revealChampion() {
+        const finalLeft = stats.byName.get(state.winners.finals.get('f-1'));
+        const finalRight = stats.byName.get(state.winners.finals.get('f-2'));
+        state.justRevealed.clear();
+        state.justRevealed.add('champion');
+        state.winners.champion = pickWinner(finalLeft, finalRight).genre;
+        renderBoard();
+        await delay(500);
+        state.justRevealed.clear();
+    }
+
+    function pickWinnerFromSlots(sourceIds) {
+        const [firstId, secondId] = sourceIds;
+        const firstName = state.winners.semifinals.get(firstId) || state.assignments.get(firstId);
+        const secondName = state.winners.semifinals.get(secondId) || state.assignments.get(secondId);
+        return pickWinner(stats.byName.get(firstName), stats.byName.get(secondName));
+    }
+
+    function drawConnectors() {
+        const boardNode = board.node();
+        if (!boardNode) return;
+
+        const boardRect = boardNode.getBoundingClientRect();
+        const width = boardNode.clientWidth;
+        const height = boardNode.clientHeight;
+
+        connectorLayer
+            .attr('width', width)
+            .attr('height', height)
+            .attr('viewBox', `0 0 ${width} ${height}`);
+
+        const paths = [];
+
+        [
+            ['qf-1', 'sf-1'], ['qf-2', 'sf-1'],
+            ['qf-3', 'sf-2'], ['qf-4', 'sf-2'],
+            ['qf-5', 'sf-3'], ['qf-6', 'sf-3'],
+            ['qf-7', 'sf-4'], ['qf-8', 'sf-4'],
+            ['sf-1', 'f-1'], ['sf-2', 'f-1'],
+            ['sf-3', 'f-2'], ['sf-4', 'f-2']
+        ].forEach(([fromId, toId]) => {
+            const fromEl = boardNode.querySelector(`[data-slot-id="${fromId}"]`);
+            const toEl = boardNode.querySelector(`[data-slot-id="${toId}"]`);
+            if (!fromEl || !toEl) return;
+
+            const fromRect = fromEl.getBoundingClientRect();
+            const toRect = toEl.getBoundingClientRect();
+            const fromY = fromRect.top - boardRect.top + fromRect.height / 2;
+            const toY = toRect.top - boardRect.top + toRect.height / 2;
+            const goingRight = fromRect.left < toRect.left;
+            const startX = goingRight ? fromRect.right - boardRect.left : fromRect.left - boardRect.left;
+            const endX = goingRight ? toRect.left - boardRect.left : toRect.right - boardRect.left;
+            const elbowX = startX + ((endX - startX) / 2);
+
+            paths.push({ d: `M ${startX} ${fromY} H ${elbowX} V ${toY} H ${endX}` });
+        });
+
+        const connectorSelection = connectorLayer.selectAll('path')
+            .data(paths);
+
+        connectorSelection.enter()
+            .append('path')
+            .merge(connectorSelection)
+            .attr('class', 'genre-playoff-connector')
+            .attr('d', d => d.d);
+
+        connectorSelection.exit().remove();
+    }
+
+    async function animateAssignmentsIntoSlots(assignmentEntries) {
+        for (const [slotId, genreName] of assignmentEntries) {
+            const genre = stats.byName.get(genreName);
+            const source = pool.node().querySelector(`[data-genre="${CSS.escape(genreName)}"]`);
+            const target = board.node().querySelector(`[data-slot-id="${slotId}"]`);
+
+            if (!source || !target) {
+                state.assignments.set(slotId, genreName);
+                renderBoard();
+                continue;
+            }
+
+            const sourceRect = source.getBoundingClientRect();
+            const targetRect = target.getBoundingClientRect();
+            const ghost = document.createElement('div');
+            ghost.className = 'genre-fly-card';
+            ghost.style.backgroundColor = genre.color;
+            ghost.style.left = `${sourceRect.left}px`;
+            ghost.style.top = `${sourceRect.top}px`;
+            ghost.style.width = `${sourceRect.width}px`;
+            ghost.style.height = `${sourceRect.height}px`;
+            ghost.innerHTML = `
+                <div class="genre-fly-name">${genre.genre}</div>
+                <div class="genre-fly-meta">${genre.countrySpread} countries</div>
+            `;
+            document.body.appendChild(ghost);
+
+            await new Promise(resolve => {
+                requestAnimationFrame(() => {
+                    ghost.classList.add('is-moving');
+                    ghost.style.transform = `translate(${targetRect.left - sourceRect.left}px, ${targetRect.top - sourceRect.top}px) scale(0.96)`;
+                });
+
+                window.setTimeout(() => {
+                    ghost.remove();
+                    state.assignments.set(slotId, genreName);
+                    renderBoard();
+                    resolve();
+                }, 520);
+            });
+
+            await delay(110);
+        }
+    }
+
+    renderBoard();
+    window.addEventListener('resize', drawConnectors, { passive: true });
+}
+
+function isBracketReady(state) {
+    return state.assignments.size === genrePlayoffStructure.quarterfinals.length;
+}
+
+function resetWinners(state) {
+    state.winners.semifinals.clear();
+    state.winners.finals.clear();
+    state.winners.champion = null;
+}
+
+function buildTooltipHtml(genre) {
+    const countries = genre.topCountries.length
+        ? genre.topCountries
+            .map(country => `<span class="genre-tooltip-pill">${country.country} (${d3.format(',')(country.titles)})</span>`)
+            .join('')
+        : '<span class="genre-tooltip-pill">No country metadata</span>';
+
+    return `
+        <div class="genre-tooltip-title">${genre.genre} (#${genre.seed})</div>
+        <div class="genre-tooltip-countries">${countries}</div>
+    `;
+}
+
+function delay(ms) {
+    return new Promise(resolve => window.setTimeout(resolve, ms));
+}
+
+function shuffleArray(items) {
+    const copy = [...items];
+    for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+}
+
+window.initGenrePlayoffs = initGenrePlayoffs;

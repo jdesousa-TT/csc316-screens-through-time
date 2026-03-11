@@ -10,7 +10,7 @@ function initRevenueBudget() {
         const processedData = processMovieData(data);
         
         // Clear container
-        const container = d3.select('#viz-2');
+        const container = d3.select('#viz-4');
         container.html('');
         
         // Create the visualization
@@ -18,7 +18,7 @@ function initRevenueBudget() {
         
     }).catch(error => {
         console.error('Error loading movie data:', error);
-        d3.select('#viz-2').html('<p class="placeholder-text">Error loading data</p>');
+        d3.select('#viz-4').html('<p class="placeholder-text">Error loading data</p>');
     });
 }
 
@@ -347,4 +347,3 @@ function formatMoney(value) {
 
 // Export for use in main.js
 window.initRevenueBudget = initRevenueBudget;
-
