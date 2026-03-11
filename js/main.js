@@ -46,7 +46,9 @@ function goToPage(pageIndex) {
         nextPageEl.classList.add('active');
         currentPage = pageIndex;
         updatePageIndicator();
-    }, 50);
+        initVisualization(currentPage);
+
+    }, 600);
 }
 
 // Navigate to next page
@@ -95,6 +97,20 @@ function initVisualization(pageIndex) {
                 initRevenueBudget();
                 initializedViz.add(pageIndex);
             }
+            break;
+        case 3:
+            // Language representation  chart
+            d3.csv('data/netflix_titles.csv').then(function(data) {
+                new LanguageRepresentation('viz-language', data);
+                initializedViz.add(pageIndex);
+            });
+            break;
+        case 4:
+            // Netflix seasons chart
+            d3.csv('data/netflix_titles.csv').then(function(data) {
+                new NetflixSeasons('viz-seasons', data);
+                initializedViz.add(pageIndex);
+            });
             break;
     }
 }
