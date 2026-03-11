@@ -88,7 +88,7 @@ function initTradingCards() {
         });
         
         // Clear placeholder
-        const container = d3.select('#viz-1');
+        const container = d3.select('#viz-3');
         container.html('');
         
         // Create cards container
@@ -101,7 +101,7 @@ function initTradingCards() {
         });
     }).catch(error => {
         console.error('Error loading data:', error);
-        d3.select('#viz-1').html('<p class="placeholder-text">Error loading data</p>');
+        d3.select('#viz-3').html('<p class="placeholder-text">Error loading data</p>');
     });
 }
 
@@ -285,4 +285,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Export for use in main.js
 window.initTradingCards = initTradingCards;
-
