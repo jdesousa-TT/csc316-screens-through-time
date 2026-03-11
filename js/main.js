@@ -85,13 +85,27 @@ function initVisualization(pageIndex) {
     
     switch(pageIndex) {
         case 1:
+            // Genre playoffs visualization
+            if (typeof initGenrePlayoffs === 'function') {
+                initGenrePlayoffs();
+                initializedViz.add(pageIndex);
+            }
+            break;
+        case 2:
+            // Country playoffs visualization
+            if (typeof initCountryPlayoffs === 'function') {
+                initCountryPlayoffs();
+                initializedViz.add(pageIndex);
+            }
+            break;
+        case 3:
             // Trading cards visualization
             if (typeof initTradingCards === 'function') {
                 initTradingCards();
                 initializedViz.add(pageIndex);
             }
             break;
-        case 2:
+        case 4:
             // Revenue vs Budget arrow chart
             if (typeof initRevenueBudget === 'function') {
                 initRevenueBudget();
@@ -127,5 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Pre-initialize visualizations
     initVisualization(1);
     initVisualization(2);
+    initVisualization(3);
+    initVisualization(4);
 });
-

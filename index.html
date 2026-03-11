@@ -57,12 +57,56 @@
 			</button>
 		</section>
 
-		<!-- Visualization Page 1 - Director Trading Cards -->
+		<!-- Visualization Page 1 - Genre Playoffs -->
 		<section class="page" data-page="1">
+			<div class="page-content viz-page genre-playoffs-page">
+				<h2 class="viz-title">Genre Playoffs</h2>
+				<p class="viz-subtitle">Drag genres into the bracket, or randomize, then reveal winners.</p>
+				<div class="viz-container genre-playoffs-viz" id="viz-1">
+					<p class="placeholder-text">Loading genre playoffs...</p>
+				</div>
+			</div>
+			
+			<button class="nav-arrow prev-arrow" onclick="prevPage()">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+					<path d="M19 12H5M12 19l-7-7 7-7"/>
+				</svg>
+			</button>
+			<button class="nav-arrow next-arrow" onclick="nextPage()">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+					<path d="M5 12h14M12 5l7 7-7 7"/>
+				</svg>
+			</button>
+		</section>
+
+		<!-- Visualization Page 2 - Country Playoffs -->
+		<section class="page" data-page="2">
+			<div class="page-content viz-page genre-playoffs-page">
+				<h2 class="viz-title">Country Playoffs</h2>
+				<p class="viz-subtitle">Drag countries into the bracket, or randomize, then reveal winners.</p>
+				<div class="viz-container genre-playoffs-viz" id="viz-2">
+					<p class="placeholder-text">Loading country playoffs...</p>
+				</div>
+			</div>
+			
+			<button class="nav-arrow prev-arrow" onclick="prevPage()">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+					<path d="M19 12H5M12 19l-7-7 7-7"/>
+				</svg>
+			</button>
+			<button class="nav-arrow next-arrow" onclick="nextPage()">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+					<path d="M5 12h14M12 5l7 7-7 7"/>
+				</svg>
+			</button>
+		</section>
+
+		<!-- Visualization Page 3 - Director Trading Cards -->
+		<section class="page" data-page="3">
 			<div class="page-content viz-page trading-cards-page">
 				<h2 class="viz-title">Director Trading Cards</h2>
 				<p class="viz-subtitle">Top 10 Disney+ Directors by Number of Titles</p>
-				<div class="viz-container trading-cards-viz" id="viz-1">
+				<div class="viz-container trading-cards-viz" id="viz-3">
 					<!-- D3 visualization will go here -->
 					<p class="placeholder-text">Loading trading cards...</p>
 				</div>
@@ -80,12 +124,12 @@
 			</button>
 		</section>
 
-		<!-- Visualization Page 2 - Revenue vs Budget -->
-		<section class="page" data-page="2">
+		<!-- Visualization Page 4 - Revenue vs Budget -->
+		<section class="page" data-page="4">
 			<div class="page-content viz-page">
 				<h2 class="viz-title">Budget vs Revenue</h2>
 				<p class="viz-subtitle">Top 20 Highest Budget Films — Arrows show profit (↑) or loss (↓)</p>
-				<div class="viz-container arrow-chart-container" id="viz-2">
+				<div class="viz-container arrow-chart-container" id="viz-4">
 					<p class="placeholder-text">Loading visualization...</p>
 				</div>
 			</div>
@@ -150,6 +194,8 @@
 	<!-- Scripts -->
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 	<script src="https://d3js.org/d3.v7.min.js"></script>
+	<script src="js/genre_playoffs.js"></script>
+	<script src="js/country_playoffs.js"></script>
 	<script src="js/trading_card.js"></script>
 	<script src="js/revenue_budget.js"></script>
 	<script src="js/language_representation.js"></script>
