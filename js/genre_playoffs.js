@@ -122,6 +122,302 @@ function ensurePlayoffRuntimeStyles() {
             color: var(--color-text-muted);
         }
 
+        .genre-playoffs-shell {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+            height: 100%;
+        }
+
+        .genre-playoffs-bracket {
+            position: relative;
+            width: 100%;
+            min-height: 380px;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1.05fr 1fr 1.2fr;
+            gap: 0.5rem;
+            align-items: stretch;
+        }
+
+        .genre-playoffs-connectors {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .genre-playoffs-column {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slot-stack {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .left-quarter,
+        .right-quarter {
+            justify-content: space-evenly;
+            gap: 0.55rem;
+        }
+
+        .left-semi,
+        .right-semi {
+            justify-content: space-around;
+            padding-top: 1.65rem;
+            padding-bottom: 1.65rem;
+            gap: 0.85rem;
+        }
+
+        .center-final {
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .genre-drop-slot,
+        .genre-winner-slot {
+            min-height: 54px;
+            display: flex;
+            align-items: stretch;
+            justify-content: stretch;
+        }
+
+        .genre-drop-slot {
+            border: 2px dashed rgba(26, 26, 26, 0.16);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.35);
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+
+        .genre-drop-slot.filled {
+            border-style: solid;
+            background: transparent;
+        }
+
+        .genre-drop-slot.drag-over {
+            border-color: var(--color-accent);
+            background: rgba(196, 93, 58, 0.08);
+        }
+
+        .genre-slot-placeholder {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.55rem;
+            font-size: 0.68rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--color-text-muted);
+            text-align: center;
+        }
+
+        .genre-slot-placeholder.winner {
+            border: 2px dashed rgba(26, 26, 26, 0.12);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.28);
+        }
+
+        .genre-playoffs-round-label {
+            font-size: 0.66rem;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--color-text-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .genre-playoff-card {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.08rem;
+            padding: 0.38rem 0.5rem 0.42rem;
+            border-radius: 12px;
+            border: 2px solid rgba(26, 26, 26, 0.08);
+            color: var(--color-text);
+            text-align: left;
+            box-shadow: 0 6px 16px rgba(26, 26, 26, 0.08);
+            cursor: pointer;
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+            width: 100%;
+        }
+
+        .genre-playoff-card:hover,
+        .genre-playoff-card:focus-visible,
+        .genre-playoff-card.is-active {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(26, 26, 26, 0.14);
+            border-color: rgba(26, 26, 26, 0.32);
+            outline: none;
+        }
+
+        .genre-playoff-card-finalist {
+            padding-top: 0.46rem;
+            padding-bottom: 0.46rem;
+        }
+
+        .genre-playoff-card.interactive {
+            cursor: grab;
+        }
+
+        .genre-playoff-name {
+            font-family: var(--font-display);
+            font-size: 1.12rem;
+            line-height: 0.95;
+        }
+
+        .genre-playoff-count {
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .genre-playoff-meta {
+            font-size: 0.66rem;
+            color: rgba(26, 26, 26, 0.68);
+            letter-spacing: 0.03em;
+        }
+
+        .genre-playoff-hint {
+            font-size: 0.62rem;
+            color: rgba(26, 26, 26, 0.68);
+            letter-spacing: 0.03em;
+        }
+
+        .revealed {
+            animation: playoffReveal 0.55s ease both;
+        }
+
+        .genre-playoff-connector {
+            fill: none;
+            stroke: rgba(26, 26, 26, 0.45);
+            stroke-width: 2;
+            stroke-linejoin: round;
+        }
+
+        .genre-playoffs-callout {
+            position: relative;
+            align-self: center;
+            margin-top: 0.9rem;
+            width: min(320px, 92%);
+            padding: 0.8rem 0.95rem;
+            border-radius: 18px;
+            background: rgba(26, 26, 26, 0.96);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 18px 34px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(6px);
+            text-align: center;
+        }
+
+        .genre-playoffs-callout-label {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.62);
+            margin-bottom: 0.28rem;
+        }
+
+        .genre-playoffs-callout-winner {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            line-height: 0.95;
+            color: white;
+            margin-bottom: 0.35rem;
+        }
+
+        .genre-playoffs-callout-copy {
+            margin: 0;
+            font-size: 0.76rem;
+            color: rgba(255, 255, 255, 0.78);
+        }
+
+        .genre-playoff-tooltip {
+            position: absolute;
+            max-width: 260px;
+            padding: 0.8rem 0.9rem;
+            border-radius: 14px;
+            background: rgba(26, 26, 26, 0.95);
+            color: white;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+            transition: opacity 0.15s ease;
+        }
+
+        .genre-tooltip-title {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            line-height: 1;
+            margin-bottom: 0.35rem;
+        }
+
+        .genre-tooltip-countries {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-top: 0.45rem;
+        }
+
+        .genre-tooltip-pill {
+            padding: 0.25rem 0.5rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
+        .genre-fly-card {
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 0.08rem;
+            padding: 0.38rem 0.5rem 0.42rem;
+            border-radius: 12px;
+            border: 2px solid rgba(26, 26, 26, 0.08);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.14);
+            color: var(--color-text);
+            pointer-events: none;
+            z-index: 1200;
+            transform: translate(0, 0);
+            transition: transform 0.44s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+        }
+
+        .genre-fly-card.is-moving {
+            opacity: 0.9;
+        }
+
+        .genre-fly-name {
+            font-family: var(--font-display);
+            font-size: 1.12rem;
+            line-height: 0.95;
+        }
+
+        .genre-fly-meta {
+            font-size: 0.66rem;
+            color: rgba(26, 26, 26, 0.68);
+            letter-spacing: 0.03em;
+        }
+
+        @keyframes playoffReveal {
+            from {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
         @media (max-width: 768px) {
             .genre-playoffs-intro {
                 flex-direction: column;
@@ -137,6 +433,29 @@ function ensurePlayoffRuntimeStyles() {
             .genre-playoffs-actions {
                 align-items: flex-start;
                 justify-content: flex-start;
+            }
+
+            .genre-playoffs-bracket {
+                grid-template-columns: 1fr;
+                min-height: auto;
+            }
+
+            .left-quarter,
+            .right-quarter,
+            .left-semi,
+            .right-semi,
+            .center-final {
+                padding: 0;
+                gap: 0.75rem;
+            }
+
+            .genre-playoffs-callout {
+                width: 100%;
+                margin-top: 0.75rem;
+            }
+
+            .genre-playoffs-connectors {
+                display: none;
             }
         }
     `;

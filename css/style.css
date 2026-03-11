@@ -300,6 +300,11 @@ body {
 	margin: -1rem 0 var(--space-md);
 }
 
+.genre-playoffs-viz {
+	background: transparent;
+	border: none;
+}
+
 /* ========================================
    Trading Cards Page
    ======================================== */
