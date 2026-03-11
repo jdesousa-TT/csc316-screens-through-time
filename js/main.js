@@ -11,7 +11,7 @@ const totalPages = pages.length;
 function updatePageIndicator() {
     const currentDisplay = document.querySelector('.current-page');
     const totalDisplay = document.querySelector('.total-pages');
-    
+
     if (currentDisplay) currentDisplay.textContent = currentPage + 1;
     if (totalDisplay) totalDisplay.textContent = totalPages;
 }
@@ -21,16 +21,16 @@ function goToPage(pageIndex) {
     if (pageIndex < 0 || pageIndex >= totalPages || pageIndex === currentPage) {
         return;
     }
-    
+
     const currentPageEl = pages[currentPage];
     const nextPageEl = pages[pageIndex];
     const direction = pageIndex > currentPage ? 'right' : 'left';
-    
+
     // Remove any existing animation classes
     pages.forEach(page => {
         page.classList.remove('slide-out-left', 'slide-in-right', 'slide-out-right', 'slide-in-left');
     });
-    
+
     // Animate out current page
     if (direction === 'right') {
         currentPageEl.classList.add('slide-out-left');
@@ -39,7 +39,7 @@ function goToPage(pageIndex) {
         currentPageEl.classList.add('slide-out-right');
         nextPageEl.classList.add('slide-in-left');
     }
-    
+
     // Update active states after animation
     setTimeout(() => {
         currentPageEl.classList.remove('active');
@@ -47,7 +47,6 @@ function goToPage(pageIndex) {
         currentPage = pageIndex;
         updatePageIndicator();
         initVisualization(currentPage);
-
     }, 600);
 }
 
@@ -82,7 +81,7 @@ const initializedViz = new Set();
 // Initialize visualizations for a page
 function initVisualization(pageIndex) {
     if (initializedViz.has(pageIndex)) return;
-    
+
     switch(pageIndex) {
         case 1:
             // Genre playoffs visualization
@@ -112,14 +111,14 @@ function initVisualization(pageIndex) {
                 initializedViz.add(pageIndex);
             }
             break;
-        case 3:
-            // Language representation  chart
+        case 5:
+            // Language representation chart
             d3.csv('data/netflix_titles.csv').then(function(data) {
                 new LanguageRepresentation('viz-language', data);
                 initializedViz.add(pageIndex);
             });
             break;
-        case 4:
+        case 6:
             // Netflix seasons chart
             d3.csv('data/netflix_titles.csv').then(function(data) {
                 new NetflixSeasons('viz-seasons', data);
@@ -132,12 +131,12 @@ function initVisualization(pageIndex) {
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     updatePageIndicator();
-    
+
     // Ensure first page is active
     if (pages.length > 0) {
         pages[0].classList.add('active');
     }
-    
+
     // Pre-initialize visualizations
     initVisualization(1);
     initVisualization(2);
