@@ -175,12 +175,51 @@
 				<p class="placeholder-text">Loading visualization...</p>
 			</div>
 		</div>
-		<button class="nav-arrow prev-arrow" onclick="prevPage()">
+		<button class="nav-arrow next-arrow" onclick="nextPage()">
 			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
 				<path d="M19 12H5M12 19l-7-7 7-7"/>
 			</svg>
 		</button>
 	</section>
+
+	<!-- Visualization Page 7 - Map -->
+	<section class="page" data-page="7">
+	<div class="page-content viz-page">
+		<h2 class="viz-title">Platform Dominance in Global Streaming Catalogs</h2>
+		<p class="viz-subtitle">Comparing where Netflix, Amazon Prime, and Disney+ source titles worldwide</p>
+
+		<div class="d-flex justify-content-center gap-3 flex-wrap mb-3">
+			<div>
+				<label for="platformFilter" class="form-label mb-1">Platform:</label>
+				<select id="platformFilter" class="form-select">
+					<option value="All">All</option>
+					<option value="Netflix">Netflix</option>
+					<option value="Amazon Prime">Amazon Prime</option>
+					<option value="Disney+">Disney+</option>
+				</select>
+			</div>
+
+			<div>
+				<label for="typeFilter" class="form-label mb-1">Type:</label>
+				<select id="typeFilter" class="form-select">
+					<option value="All">All</option>
+					<option value="TV">TV</option>
+					<option value="Film">Film</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="viz-container" id="viz-streaming-map" style="height:auto; min-height:520px;">
+			<p class="placeholder-text">Loading visualization...</p>
+		</div>
+	</div>
+
+	<button class="nav-arrow prev-arrow" onclick="prevPage()">
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+			<path d="M19 12H5M12 19l-7-7 7-7"/>
+		</svg>
+	</button>
+</section>
 
 </div>
 
@@ -188,18 +227,20 @@
 <div class="page-indicator">
 	<span class="current-page">1</span>
 	<span class="page-divider">/</span>
-	<span class="total-pages">7</span>
+	<span class="total-pages">8</span>
 </div>
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 <script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
 <script src="js/genre_playoffs.js"></script>
 <script src="js/country_playoffs.js"></script>
 <script src="js/trading_card.js"></script>
 <script src="js/revenue_budget.js"></script>
 <script src="js/language_representation.js"></script>
 <script src="js/netflix_seasons.js"></script>
+<script src="js/streaming_map.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>
