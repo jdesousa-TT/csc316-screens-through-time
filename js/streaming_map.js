@@ -19,9 +19,9 @@ const tooltip = wrapper.append("div")
 // use wrapper as container
 const container = wrapper.node();
 
-// set size
+// set size — fill available viewport
 const width = container.clientWidth || 1100;
-const height = 620;
+const height = Math.max(520, Math.round(window.innerHeight * 0.75));
 
 svg.attr("viewBox", `0 0 ${width} ${height}`);
 

@@ -128,8 +128,11 @@
 		<div class="page-content viz-page">
 			<h2 class="viz-title">Budget vs Revenue</h2>
 			<p class="viz-subtitle">Did the budget pay off? Arrows show each film's return on investment</p>
-			<div class="viz-container arrow-chart-container" id="viz-4">
-				<p class="placeholder-text">Loading visualization...</p>
+			<div class="viz-layout">
+				<div class="viz-container arrow-chart-container" id="viz-4">
+					<p class="placeholder-text">Loading visualization...</p>
+				</div>
+				<div class="viz-sidebar" id="rb-sidebar"></div>
 			</div>
 		</div>
 
@@ -150,7 +153,7 @@
 		<div class="page-content viz-page">
 			<h2 class="viz-title">Language Representation Over Time</h2>
 			<p class="viz-subtitle">How has the diversity of languages on Netflix changed across decades?</p>
-			<div class="viz-container" id="viz-language" style="height:auto; min-height:460px;">
+			<div class="viz-container" id="viz-language">
 				<p class="placeholder-text">Loading visualization...</p>
 			</div>
 		</div>
@@ -171,7 +174,7 @@
 		<div class="page-content viz-page">
 			<h2 class="viz-title">How Many Seasons Do Netflix Shows Have?</h2>
 			<p class="viz-subtitle">Streaming platforms favour short, limited series over long-running shows</p>
-			<div class="viz-container" id="viz-seasons" style="height:auto; min-height:460px;">
+			<div class="viz-container" id="viz-seasons">
 				<p class="placeholder-text">Loading visualization...</p>
 			</div>
 		</div>
@@ -193,29 +196,29 @@
 		<h2 class="viz-title">Platform Dominance in Global Streaming Catalogs</h2>
 		<p class="viz-subtitle">Comparing where Netflix, Amazon Prime, and Disney+ source titles worldwide</p>
 
-		<div class="d-flex justify-content-center gap-3 flex-wrap mb-3">
-			<div>
-				<label for="platformFilter" class="form-label mb-1">Platform:</label>
-				<select id="platformFilter" class="form-select">
-					<option value="All">All</option>
-					<option value="Netflix">Netflix</option>
-					<option value="Amazon Prime">Amazon Prime</option>
-					<option value="Disney+">Disney+</option>
-				</select>
+		<div class="viz-layout">
+			<div class="viz-container" id="viz-streaming-map" style="height:auto; min-height:520px;">
+				<p class="placeholder-text">Loading visualization...</p>
 			</div>
-
-			<div>
-				<label for="typeFilter" class="form-label mb-1">Type:</label>
-				<select id="typeFilter" class="form-select">
-					<option value="All">All</option>
-					<option value="TV">TV</option>
-					<option value="Film">Film</option>
-				</select>
+			<div class="viz-sidebar">
+				<div>
+					<label for="platformFilter">Platform</label>
+					<select id="platformFilter">
+						<option value="All">All</option>
+						<option value="Netflix">Netflix</option>
+						<option value="Amazon Prime">Amazon Prime</option>
+						<option value="Disney+">Disney+</option>
+					</select>
+				</div>
+				<div>
+					<label for="typeFilter">Type</label>
+					<select id="typeFilter">
+						<option value="All">All</option>
+						<option value="TV">TV</option>
+						<option value="Film">Film</option>
+					</select>
+				</div>
 			</div>
-		</div>
-
-		<div class="viz-container" id="viz-streaming-map" style="height:auto; min-height:520px;">
-			<p class="placeholder-text">Loading visualization...</p>
 		</div>
 	</div>
 
@@ -236,8 +239,11 @@
 		<div class="page-content viz-page">
 			<h2 class="viz-title">Genre &amp; Language Connections</h2>
 			<p class="viz-subtitle">How do film genres relate to their original language? Flow width shows the number of films.</p>
-			<div class="viz-container" id="viz-genre-lang" style="height:auto; min-height:520px;">
-				<p class="placeholder-text">Loading visualization...</p>
+			<div class="viz-layout">
+				<div class="viz-container" id="viz-genre-lang" style="height:auto; min-height:520px;">
+					<p class="placeholder-text">Loading visualization...</p>
+				</div>
+				<div class="viz-sidebar" id="gl-sidebar"></div>
 			</div>
 		</div>
 

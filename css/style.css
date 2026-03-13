@@ -84,6 +84,11 @@ body {
 	text-align: center;
 }
 
+.page-content.viz-page:not(.trading-cards-page) {
+	max-width: 96vw;
+	padding: var(--space-sm) var(--space-md);
+}
+
 /* Allow trading cards page to scroll and align to top */
 .page:has(.trading-cards-page) {
 	align-items: flex-start;
@@ -278,14 +283,58 @@ body {
 
 .viz-container {
 	width: 100%;
-	max-width: 1000px;
-	height: 500px;
+	max-width: none;
+	height: auto;
+	min-height: 70vh;
 	background: var(--color-bg-alt);
 	border: 1px solid var(--color-line);
 	border-radius: 4px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+}
+
+/* ── Sidebar layout for pages with controls ── */
+.viz-layout {
+	display: grid;
+	grid-template-columns: 1fr 210px;
+	gap: var(--space-md);
+	width: 100%;
+	align-items: start;
+}
+
+.viz-layout .viz-container {
+	min-width: 0;
+}
+
+.viz-sidebar {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-sm);
+	padding: var(--space-sm);
+	background: var(--color-bg-alt);
+	border: 1px solid var(--color-line);
+	border-radius: 4px;
+	position: sticky;
+	top: var(--space-md);
+}
+
+.viz-sidebar label {
+	font-size: 0.7rem;
+	font-weight: 500;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--color-text-muted);
+	margin-bottom: 0.2rem;
+}
+
+.viz-sidebar select {
+	font-size: 0.85rem;
+	padding: 6px 10px;
+	border: 1px solid var(--color-line);
+	border-radius: 4px;
+	background: white;
+	color: var(--color-text);
 }
 
 .placeholder-text {
@@ -551,7 +600,7 @@ body {
 	justify-content: center;
 	padding: var(--space-md);
 	height: auto !important;
-	min-height: 500px;
+	min-height: 70vh;
 }
 
 .arrow-chart {
@@ -755,14 +804,14 @@ body {
 
 .waffle-squares {
 	display: grid;
-	grid-template-columns: repeat(8, 16px);
-	grid-template-rows: repeat(10, 16px);
-	gap: 2px;
+	grid-template-columns: repeat(8, 22px);
+	grid-template-rows: repeat(10, 22px);
+	gap: 3px;
 }
 
 .waffle-cell {
-	width: 16px;
-	height: 16px;
+	width: 22px;
+	height: 22px;
 	border-radius: 2px;
 	cursor: pointer;
 	transition: outline 0.1s ease, transform 0.15s ease;
@@ -776,7 +825,7 @@ body {
 
 .waffle-pct-bar {
 	display: flex;
-	width: 134px;
+	width: 185px;
 	height: 6px;
 	border-radius: 3px;
 	overflow: hidden;
@@ -840,8 +889,8 @@ body {
 .seasons-chart {
 	display: flex;
 	align-items: flex-end;
-	gap: 2rem;
-	padding: 1rem 2rem;
+	gap: 3rem;
+	padding: 1.5rem 3rem;
 }
 
 .seasons-col {
@@ -870,8 +919,8 @@ body {
 }
 
 .screen-icon {
-	width: 64px;
-	height: 44px;
+	width: 76px;
+	height: 52px;
 	background: #1a2744;
 	border-radius: 5px;
 	border: 2px solid #2e3f6b;
@@ -894,8 +943,8 @@ body {
 }
 
 .screen-inner {
-	width: 48px;
-	height: 32px;
+	width: 56px;
+	height: 38px;
 	background: #0f172a;
 	border-radius: 3px;
 	display: flex;
@@ -992,7 +1041,17 @@ body {
 	}
 
 	.viz-container {
-		height: 350px;
+		min-height: 350px;
+	}
+
+	.viz-layout {
+		grid-template-columns: 1fr;
+	}
+
+	.viz-sidebar {
+		flex-direction: row;
+		flex-wrap: wrap;
+		position: static;
 	}
 }
 
@@ -1002,7 +1061,8 @@ Map
 .streaming-map-wrapper {
 	position: relative;
 	width: 100%;
-	height: 620px;
+	height: 75vh;
+	min-height: 520px;
 }
 
 .streaming-map-svg {

@@ -20,16 +20,11 @@ function rbInjectStyles() {
       overflow: visible;
     }
 
-    /* ── Top controls row ── */
+    /* ── Controls (in sidebar) ── */
     #rb-controls {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: nowrap;
-      margin-bottom: 12px;
-      padding: 0 4px;
-      width: 100%;
-      box-sizing: border-box;
+      flex-direction: column;
+      gap: 6px;
     }
     .rb-pill {
       padding: 5px 16px;
@@ -51,24 +46,21 @@ function rbInjectStyles() {
       color: #fff;
     }
     #rb-legend {
-      margin-left: auto;
       display: flex;
-      gap: 18px;
+      gap: 14px;
       align-items: center;
       font-size: 12px;
       color: #999;
+      margin-top: 8px;
     }
     .rb-leg { display: flex; align-items: center; gap: 5px; }
 
-    /* ── Slider row ── */
+    /* ── Slider row (sidebar) ── */
     #rb-slider-row {
       display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 18px;
-      padding: 0 4px;
-      width: 100%;
-      box-sizing: border-box;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
     }
     #rb-slider-label {
       font-size: 11px;
@@ -143,9 +135,7 @@ function rbInjectStyles() {
       font-size: 11px;
       color: #888;
       white-space: nowrap;
-      flex-shrink: 0;
-      min-width: 130px;
-      text-align: right;
+      text-align: center;
     }
     #rb-range-display span {
       color: #c9a84c;
@@ -258,8 +248,11 @@ function rbDraw(allFilms) {
   let sliderHi = globalMax;
   let active    = 'all';
 
-  // Top controls row
-  const ctrlDiv = container.append('div').attr('id', 'rb-controls');
+  // Render controls into sidebar
+  const sidebar = d3.select('#rb-sidebar');
+  sidebar.html('');
+
+  const ctrlDiv = sidebar.append('div').attr('id', 'rb-controls');
 
   const filters = [
     { id: 'all',    label: 'All Films'  },
@@ -279,7 +272,7 @@ function rbDraw(allFilms) {
       });
   });
 
-  ctrlDiv.append('div').attr('id', 'rb-legend').html(`
+  sidebar.append('div').attr('id', 'rb-legend').html(`
     <div class="rb-leg">
       <span style="color:#4a9e6b;font-size:16px">↑</span><span>Profit</span>
     </div>
@@ -288,12 +281,12 @@ function rbDraw(allFilms) {
     </div>
   `);
 
-  // Slider row 
-  const sliderRow = container.append('div').attr('id', 'rb-slider-row');
+  // Slider row
+  const sliderRow = sidebar.append('div').attr('id', 'rb-slider-row');
   sliderRow.append('div').attr('id', 'rb-slider-label').text('Budget range');
 
   const sliderWrap = sliderRow.append('div').attr('id', 'rb-slider-wrap');
-  sliderWrap.append('div').attr('id', 'rb-slider-track'); // gold highlight
+  sliderWrap.append('div').attr('id', 'rb-slider-track');
 
   const inputLo = sliderWrap.append('input')
     .attr('type', 'range').attr('id', 'rb-input-lo')
@@ -331,10 +324,10 @@ function rbDraw(allFilms) {
     refresh(false);
   });
 
-  // SVG setup 
+  // SVG setup
   const node   = document.getElementById('viz-4');
   const fullW  = (node.offsetWidth || node.clientWidth || 900) - 48;
-  const fullH  = Math.max(500, Math.min(580, window.innerHeight * 0.52));
+  const fullH  = Math.max(500, Math.round(window.innerHeight * 0.72));
   const margin = { top: 20, right: 36, bottom: 130, left: 74 };
   const W      = fullW - margin.left - margin.right;
   const H      = fullH - margin.top  - margin.bottom;

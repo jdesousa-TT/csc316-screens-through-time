@@ -60,11 +60,8 @@ function glInjectStyles() {
     }
     #gl-controls {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 14px;
-      padding: 0 4px;
+      flex-direction: column;
+      gap: 6px;
     }
     .gl-pill {
       padding: 5px 14px;
@@ -163,8 +160,11 @@ function glDraw(pairs) {
   let activeGenres = new Set(topGenres);
   let excludeEnglish = false;
 
-  // Controls
-  const ctrlDiv = container.append('div').attr('id', 'gl-controls');
+  // Render controls into sidebar
+  const sidebar = d3.select('#gl-sidebar');
+  sidebar.html('');
+
+  const ctrlDiv = sidebar.append('div').attr('id', 'gl-controls');
   const allBtn = ctrlDiv.append('button')
     .attr('class', 'gl-pill gl-active')
     .style('background', '#c9a84c').style('border-color', '#c9a84c')
@@ -190,12 +190,9 @@ function glDraw(pairs) {
       });
   });
 
-  // Separator + English toggle
-  ctrlDiv.append('span').style('width', '1px').style('height', '24px')
-    .style('background', 'rgba(0,0,0,0.1)').style('margin', '0 6px');
-
   const engBtn = ctrlDiv.append('button')
     .attr('class', 'gl-pill')
+    .style('margin-top', '6px')
     .text('Exclude English')
     .on('click', () => {
       excludeEnglish = !excludeEnglish;
@@ -229,7 +226,7 @@ function glDraw(pairs) {
   // SVG
   const node = document.getElementById('viz-genre-lang');
   const fullW = (node.offsetWidth || node.clientWidth || 900) - 48;
-  const fullH = 520;
+  const fullH = Math.max(500, Math.round(window.innerHeight * 0.72));
   const margin = { top: 30, right: 120, bottom: 20, left: 120 };
   const W = fullW - margin.left - margin.right;
   const H = fullH - margin.top - margin.bottom;
