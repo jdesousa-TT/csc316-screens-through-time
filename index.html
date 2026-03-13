@@ -129,9 +129,16 @@
 		<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
 		Story Map
 	</button>
+	<button class="viz-nav viz-nav-next" onclick="goToPage(4)">
+		Language Representation
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M9 6l6 6-6 6"/></svg>
+	</button>
 	<div class="page-content viz-page genre-playoffs-page">
 		<h2 class="viz-title">Genre Playoffs</h2>
 		<p class="viz-subtitle">Drag genres into the bracket, or randomize, then reveal winners.</p>
+		<div class="viz-explanation">
+			<p>Placeholder explanation for Genre Playoffs. Describe what the audience should take away from this visualization and how it connects to the overall narrative.</p>
+		</div>
 		<div class="viz-container genre-playoffs-viz" id="viz-1">
 			<p class="placeholder-text">Loading genre playoffs...</p>
 		</div>
@@ -144,9 +151,20 @@
 		<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
 		Story Map
 	</button>
+	<button class="viz-nav viz-nav-prev" onclick="goToPage(2)">
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M15 6l-6 6 6 6"/></svg>
+		Genre Playoffs
+	</button>
+	<button class="viz-nav viz-nav-next" onclick="goToPage(5)">
+		Genre &amp; Language
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M9 6l6 6-6 6"/></svg>
+	</button>
 	<div class="page-content viz-page">
 		<h2 class="viz-title">Language Representation Over Time</h2>
 		<p class="viz-subtitle">How has the diversity of languages on Netflix changed across decades?</p>
+		<div class="viz-explanation">
+			<p>Placeholder explanation for Language Representation. Describe what patterns emerge from language diversity trends and why they matter.</p>
+		</div>
 		<div class="viz-container" id="viz-language">
 			<p class="placeholder-text">Loading visualization...</p>
 		</div>
@@ -159,9 +177,20 @@
 		<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
 		Story Map
 	</button>
+	<button class="viz-nav viz-nav-prev" onclick="goToPage(4)">
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M15 6l-6 6 6 6"/></svg>
+		Language Representation
+	</button>
+	<button class="viz-nav viz-nav-next" onclick="goToPage(6)">
+		Budget vs Revenue
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M9 6l6 6-6 6"/></svg>
+	</button>
 	<div class="page-content viz-page">
 		<h2 class="viz-title">Genre &amp; Language Connections</h2>
 		<p class="viz-subtitle">How do film genres relate to their original language? Flow width shows the number of films.</p>
+		<div class="viz-explanation">
+			<p>Placeholder explanation for Genre &amp; Language Connections. Describe the relationship between genres and languages of origin and what this reveals.</p>
+		</div>
 		<div class="viz-layout">
 			<div class="viz-container" id="viz-genre-lang" style="height:auto; min-height:520px;">
 				<p class="placeholder-text">Loading visualization...</p>
@@ -177,9 +206,20 @@
 		<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
 		Story Map
 	</button>
+	<button class="viz-nav viz-nav-prev" onclick="goToPage(5)">
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M15 6l-6 6 6 6"/></svg>
+		Genre &amp; Language
+	</button>
+	<button class="viz-nav viz-nav-next" onclick="goToPage(7)">
+		Streaming Map
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M9 6l6 6-6 6"/></svg>
+	</button>
 	<div class="page-content viz-page">
 		<h2 class="viz-title">Budget vs Revenue</h2>
 		<p class="viz-subtitle">Did the budget pay off? Arrows show each film's return on investment</p>
+		<div class="viz-explanation">
+			<p>Placeholder explanation for Budget vs Revenue. Describe how genre and language trends drive return on investment in the film industry.</p>
+		</div>
 		<div class="viz-layout">
 			<div class="viz-container arrow-chart-container" id="viz-4">
 				<p class="placeholder-text">Loading visualization...</p>
@@ -195,10 +235,16 @@
 		<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
 		Story Map
 	</button>
+	<button class="viz-nav viz-nav-prev" onclick="goToPage(6)">
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M15 6l-6 6 6 6"/></svg>
+		Budget vs Revenue
+	</button>
 	<div class="page-content viz-page">
 		<h2 class="viz-title">Platform Dominance in Global Streaming Catalogs</h2>
 		<p class="viz-subtitle">Comparing where Netflix, Amazon Prime, and Disney+ source titles worldwide</p>
-
+		<div class="viz-explanation">
+			<p>Placeholder explanation for Global Streaming Map. Describe what the geographic distribution of platform catalogs tells us about the global streaming landscape.</p>
+		</div>
 		<div class="viz-layout">
 			<div class="viz-container" id="viz-streaming-map" style="height:auto; min-height:520px;">
 				<p class="placeholder-text">Loading visualization...</p>
