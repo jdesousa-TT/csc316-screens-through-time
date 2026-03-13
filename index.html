@@ -137,7 +137,15 @@
 		<h2 class="viz-title">Genre Playoffs</h2>
 		<p class="viz-subtitle">Drag genres into the bracket, or randomize, then reveal winners.</p>
 		<div class="viz-explanation">
-			<p>Placeholder explanation for Genre Playoffs. Describe what the audience should take away from this visualization and how it connects to the overall narrative.</p>
+			<button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
+				About this visualization
+			</button>
+			<div class="viz-explanation-body"><div class="viz-explanation-body-inner">
+				<p>Film and television are often grouped into genres that suggest a wide variety of storytelling styles. With so many genres appearing in global media catalogs such as Netflix, Prime, and Disney+, it can seem as though audiences are exposed to a diverse set of production backgrounds.</p>
+				<p style="margin-top:0.6rem">This visualization turns genre popularity into a &ldquo;playoff&rdquo; bracket. Drag genres into the bracket to compare how widely different categories of content appear across countries. As you explore, hover over each genre to see where these titles are produced and which languages dominate. You can also click on a genre to discover the directors behind many of these titles.</p>
+				<p style="margin-top:0.6rem">At first glance, the bracket simply highlights which genres are most widely produced. But a closer look reveals a pattern: across many genres, the same production hubs and languages appear repeatedly, raising a deeper question about how diverse global media production actually is.</p>
+			</div></div>
 		</div>
 		<div class="viz-container genre-playoffs-viz" id="viz-1">
 			<p class="placeholder-text">Loading genre playoffs...</p>
@@ -163,7 +171,14 @@
 		<h2 class="viz-title">Language Representation Over Time</h2>
 		<p class="viz-subtitle">How has the diversity of languages on Netflix changed across decades?</p>
 		<div class="viz-explanation">
-			<p>Placeholder explanation for Language Representation. Describe what patterns emerge from language diversity trends and why they matter.</p>
+			<button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
+				About this visualization
+			</button>
+			<div class="viz-explanation-body"><div class="viz-explanation-body-inner">
+				<p>For decades, English was the default language of all media, and the stories that reached the world were usually almost American or British. But scroll through Netflix today, and it is completely different.
+					This visualization tracks the language origins of streaming content across four decades: the 1980s through the 2010s. Each small square represents a portion of titles from that decade. The pattern that emerges is that English is still the dominant language, but it's so much less so. South Asian and East Asian content has grown substantially since the 1980s, reflecting the rise of Bollywood, Korean Dramas, and anime. Spanish-language content has also grown alongside Arabic and Turkish titles.</p>
+			</div></div>
 		</div>
 		<div class="viz-container" id="viz-language">
 			<p class="placeholder-text">Loading visualization...</p>
@@ -189,7 +204,13 @@
 		<h2 class="viz-title">Genre &amp; Language Connections</h2>
 		<p class="viz-subtitle">How do film genres relate to their original language? Flow width shows the number of films.</p>
 		<div class="viz-explanation">
-			<p>Placeholder explanation for Genre &amp; Language Connections. Describe the relationship between genres and languages of origin and what this reveals.</p>
+			<button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
+				About this visualization
+			</button>
+			<div class="viz-explanation-body"><div class="viz-explanation-body-inner">
+				<p>Placeholder explanation for Genre &amp; Language Connections. Describe the relationship between genres and languages of origin and what this reveals.</p>
+			</div></div>
 		</div>
 		<div class="viz-layout">
 			<div class="viz-container" id="viz-genre-lang" style="height:auto; min-height:520px;">
@@ -218,7 +239,13 @@
 		<h2 class="viz-title">Budget vs Revenue</h2>
 		<p class="viz-subtitle">Did the budget pay off? Arrows show each film's return on investment</p>
 		<div class="viz-explanation">
-			<p>Placeholder explanation for Budget vs Revenue. Describe how genre and language trends drive return on investment in the film industry.</p>
+			<button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
+				About this visualization
+			</button>
+			<div class="viz-explanation-body"><div class="viz-explanation-body-inner">
+				<p>Placeholder explanation for Budget vs Revenue. Describe how genre and language trends drive return on investment in the film industry.</p>
+			</div></div>
 		</div>
 		<div class="viz-layout">
 			<div class="viz-container arrow-chart-container" id="viz-4">
@@ -243,7 +270,13 @@
 		<h2 class="viz-title">Platform Dominance in Global Streaming Catalogs</h2>
 		<p class="viz-subtitle">Comparing where Netflix, Amazon Prime, and Disney+ source titles worldwide</p>
 		<div class="viz-explanation">
-			<p>Placeholder explanation for Global Streaming Map. Describe what the geographic distribution of platform catalogs tells us about the global streaming landscape.</p>
+			<button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
+				About this visualization
+			</button>
+			<div class="viz-explanation-body"><div class="viz-explanation-body-inner">
+				<p>Streaming platforms are often described as global, but the origins of the content within their catalogs are not evenly distributed around the world. This visualization reflects how different regions contribute to the libraries of major streaming services such as Netflix, Amazon Prime, and Disney+. By comparing where titles are produced, it highlights patterns in platform dominance and reveals which parts of the world supply the most content. On the globe, each country displays colored markers for the platforms, where larger markers indicate a greater number of titles linked to that country. These patterns suggest that while streaming platforms distribute content globally, the production of that content is still concentrated in a smaller set of influential regions. Together, these trends connect to the broader theme of our project: although streaming has expanded access to international media, the industry continues to be shaped by regional production hubs.</p>
+			</div></div>
 		</div>
 		<div class="viz-layout">
 			<div class="viz-container" id="viz-streaming-map" style="height:auto; min-height:520px;">

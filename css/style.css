@@ -614,21 +614,68 @@ body {
 
 .viz-explanation {
 	max-width: 780px;
-	margin: 0 auto var(--space-md);
-	padding: 0.9rem 1.3rem;
+	margin: 0 auto var(--space-sm);
+	text-align: center;
+}
+
+.viz-explanation-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 5px 14px 5px 12px;
+	border: 1px solid var(--color-line);
+	border-radius: 100px;
+	background: var(--color-bg);
+	font-family: var(--font-body);
+	font-size: 0.78rem;
+	font-weight: 500;
+	letter-spacing: 0.03em;
+	color: var(--color-text-muted);
+	cursor: pointer;
+	transition: all var(--transition-fast);
+}
+
+.viz-explanation-toggle:hover {
+	border-color: var(--color-accent);
+	color: var(--color-accent);
+}
+
+.viz-explanation-toggle svg {
+	transition: transform 0.25s ease;
+}
+
+.viz-explanation.open .viz-explanation-toggle svg {
+	transform: rotate(180deg);
+}
+
+.viz-explanation-body {
+	overflow: hidden;
+	max-height: 0;
+	opacity: 0;
+	transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.3s ease;
+	margin-top: 0;
+}
+
+.viz-explanation.open .viz-explanation-body {
+	max-height: 600px;
+	opacity: 1;
+	margin-top: 0.7rem;
+}
+
+.viz-explanation-body-inner {
+	padding: 0.85rem 1.2rem;
 	background: rgba(26, 26, 26, 0.03);
 	border-left: 3px solid var(--color-accent, #C45D3A);
 	border-radius: 0 8px 8px 0;
 	text-align: left;
 }
 
-.viz-explanation p {
+.viz-explanation-body p {
 	margin: 0;
 	font-family: var(--font-body);
-	font-size: 0.92rem;
-	line-height: 1.7;
+	font-size: 0.88rem;
+	line-height: 1.75;
 	color: var(--color-text-muted);
-	font-style: italic;
 }
 
 .genre-playoffs-viz {
