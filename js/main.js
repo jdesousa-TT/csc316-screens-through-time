@@ -125,6 +125,16 @@ function initVisualization(pageIndex) {
                 initializedViz.add(pageIndex);
             });
             break;
+        case 7:
+            // Streaming map (already auto-inits via streaming_map.js)
+            initializedViz.add(pageIndex);
+            break;
+        case 8:
+            if (typeof initGenreLanguage === 'function') {
+                initGenreLanguage();
+                initializedViz.add(pageIndex);
+            }
+            break;
     }
 }
 
