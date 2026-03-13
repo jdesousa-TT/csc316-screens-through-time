@@ -3,7 +3,7 @@
  *
  * Architecture:
  *   Pages 0-1 (Title + Hub) live in a scroll-snap container.
- *   Pages 2-9 (visualizations) are fixed overlays toggled on/off.
+ *   Pages 2-7 (visualizations) are fixed overlays toggled on/off.
  */
 
 const scrollLanding = document.getElementById('scroll-landing');
@@ -88,18 +88,6 @@ function initVisualization(pageIndex) {
             break;
         case 7:
             initializedViz.add(pageIndex);
-            break;
-        case 8:
-            if (typeof initCountryPlayoffs === 'function') {
-                initCountryPlayoffs();
-                initializedViz.add(pageIndex);
-            }
-            break;
-        case 9:
-            d3.csv('data/netflix_titles.csv').then(function (data) {
-                new NetflixSeasons('viz-seasons', data);
-                initializedViz.add(pageIndex);
-            });
             break;
     }
 }

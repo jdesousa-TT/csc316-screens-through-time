@@ -51,7 +51,8 @@
 		</div>
 
 		<div class="scroll-hint" aria-hidden="true">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28">
+			<span class="scroll-hint-label">Story Map</span>
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="24" height="24">
 				<path d="M6 9l6 6 6-6"/>
 			</svg>
 		</div>
@@ -99,12 +100,23 @@
 				</div>
 			</div>
 
-			<div class="hub-appendix-row">
-				<span class="hub-appendix-label">Appendix</span>
-				<button class="hub-appendix-btn" onclick="goToPage(8)">Country Playoffs</button>
-				<span class="hub-appendix-dot">&middot;</span>
-				<button class="hub-appendix-btn" onclick="goToPage(9)">Netflix Seasons</button>
-			</div>
+		</div>
+
+		<div class="scroll-hint" aria-hidden="true">
+			<span class="scroll-hint-label">Conclusion</span>
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="24" height="24">
+				<path d="M6 9l6 6 6-6"/>
+			</svg>
+		</div>
+	</section>
+
+	<!-- Page 2 (scroll) — Conclusion -->
+	<section class="snap-section conclusion-section" data-page="conclusion">
+		<div class="page-content conclusion-page">
+			<h2 class="conclusion-title">Conclusion</h2>
+			<p class="conclusion-body">
+				Your conclusive write-up goes here.
+			</p>
 		</div>
 	</section>
 </div>
@@ -228,48 +240,14 @@
 	</div>
 </section>
 
-<!-- Page 8 — Country Playoffs (Appendix) -->
-<section class="overlay-page" data-page="8">
-	<button class="hub-back-btn" onclick="goToStoryHub()">
-		<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
-		Story Map
-	</button>
-	<div class="page-content viz-page genre-playoffs-page">
-		<p class="viz-subtitle" style="letter-spacing:0.15em; text-transform:uppercase; font-size:0.7rem; color:#bbb; margin-bottom:0.2rem;">Appendix</p>
-		<h2 class="viz-title">Country Playoffs</h2>
-		<p class="viz-subtitle">Drag countries into the bracket, or randomize, then reveal winners.</p>
-		<div class="viz-container genre-playoffs-viz" id="viz-2">
-			<p class="placeholder-text">Loading country playoffs...</p>
-		</div>
-	</div>
-</section>
-
-<!-- Page 9 — Netflix Seasons (Appendix) -->
-<section class="overlay-page" data-page="9">
-	<button class="hub-back-btn" onclick="goToStoryHub()">
-		<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
-		Story Map
-	</button>
-	<div class="page-content viz-page">
-		<p class="viz-subtitle" style="letter-spacing:0.15em; text-transform:uppercase; font-size:0.7rem; color:#bbb; margin-bottom:0.2rem;">Appendix</p>
-		<h2 class="viz-title">How Many Seasons Do Netflix Shows Have?</h2>
-		<p class="viz-subtitle">Streaming platforms favour short, limited series over long-running shows</p>
-		<div class="viz-container" id="viz-seasons">
-			<p class="placeholder-text">Loading visualization...</p>
-		</div>
-	</div>
-</section>
-
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
 <script src="js/genre_playoffs.js"></script>
-<script src="js/country_playoffs.js"></script>
 <script src="js/trading_card.js"></script>
 <script src="js/revenue_budget.js"></script>
 <script src="js/language_representation.js"></script>
-<script src="js/netflix_seasons.js"></script>
 <script src="js/streaming_map.js"></script>
 <script src="js/genre_language.js"></script>
 <script src="js/main.js"></script>

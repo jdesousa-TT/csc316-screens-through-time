@@ -109,20 +109,32 @@ body {
 	padding: var(--space-sm) var(--space-md);
 }
 
-/* ── Scroll-down hint on title page ── */
+/* ── Scroll-down hint on snap sections ── */
 .scroll-hint {
 	position: absolute;
-	bottom: 2.5rem;
+	bottom: 2rem;
 	left: 50%;
 	transform: translateX(-50%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.25rem;
 	color: var(--color-text-muted);
-	opacity: 0.45;
+	opacity: 0.4;
 	animation: hintBounce 2s ease-in-out infinite;
+}
+
+.scroll-hint-label {
+	font-family: var(--font-body);
+	font-size: 0.68rem;
+	font-weight: 500;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
 }
 
 @keyframes hintBounce {
 	0%, 100% { transform: translateX(-50%) translateY(0); }
-	50%      { transform: translateX(-50%) translateY(8px); }
+	50%      { transform: translateX(-50%) translateY(6px); }
 }
 
 /* ========================================
@@ -219,6 +231,39 @@ body {
 .course-info .separator {
 	margin: 0 var(--space-xs);
 	color: var(--color-line);
+}
+
+/* ========================================
+   Conclusion (scroll section after hub)
+   ======================================== */
+
+.conclusion-section {
+	background: var(--color-bg);
+}
+
+.conclusion-page {
+	max-width: 720px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 1.5rem;
+}
+
+.conclusion-title {
+	font-family: var(--font-display);
+	font-size: 2.6rem;
+	font-weight: 300;
+	color: var(--color-text);
+	margin: 0;
+}
+
+.conclusion-body {
+	font-family: var(--font-body);
+	font-size: 1.05rem;
+	line-height: 1.8;
+	color: var(--color-text-muted);
+	margin: 0;
 }
 
 /* ========================================
@@ -329,43 +374,6 @@ body {
 	font-size: 0.78rem;
 	color: var(--color-text-muted);
 	line-height: 1.5;
-}
-
-/* -- Appendix links below the arc -- */
-.hub-appendix-row {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	margin-top: var(--space-md);
-}
-
-.hub-appendix-label {
-	font-size: 0.62rem;
-	font-weight: 500;
-	letter-spacing: 0.14em;
-	text-transform: uppercase;
-	color: var(--color-text-muted);
-}
-
-.hub-appendix-btn {
-	font-family: var(--font-body);
-	font-size: 0.78rem;
-	background: none;
-	border: 1px solid var(--color-line);
-	border-radius: 100px;
-	padding: 4px 14px;
-	color: var(--color-text-muted);
-	cursor: pointer;
-	transition: border-color var(--transition-fast), color var(--transition-fast);
-}
-
-.hub-appendix-btn:hover {
-	border-color: var(--color-accent);
-	color: var(--color-accent);
-}
-
-.hub-appendix-dot {
-	color: var(--color-line);
 }
 
 /* -- Back to Story Map button (all viz pages) -- */
@@ -1058,156 +1066,6 @@ body {
 }
 
 .waffle-tooltip {
-	position: fixed;
-	background: rgba(26, 26, 26, 0.95);
-	color: white;
-	padding: 10px 14px;
-	border-radius: 8px;
-	font-family: var(--font-body);
-	font-size: 13px;
-	line-height: 1.5;
-	pointer-events: none;
-	z-index: 9999;
-	transition: opacity 0.15s ease;
-	box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-}
-
-/* ============================================================
-   Netflix Seasons Chart (Maryam)
-   ============================================================ */
-
-.seasons-wrapper {
-	width: 100%;
-	padding: 1.5rem 1rem 1rem;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 1.5rem;
-}
-
-.seasons-insight {
-	font-family: var(--font-display);
-	font-size: 1.05rem;
-	color: var(--color-text-muted, #888);
-	max-width: 600px;
-	text-align: center;
-	margin: 0;
-	font-style: italic;
-}
-
-.seasons-insight strong {
-	color: var(--color-accent);
-	font-style: normal;
-}
-
-.seasons-chart {
-	display: flex;
-	align-items: flex-end;
-	gap: 3rem;
-	padding: 1.5rem 3rem;
-}
-
-.seasons-col {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 0.4rem;
-	cursor: pointer;
-	opacity: 0;
-	animation: colFadeIn 0.5s ease forwards;
-	transition: transform 0.2s ease;
-}
-
-.seasons-col:hover {
-	transform: translateY(-4px);
-}
-
-@keyframes colFadeIn {
-	to { opacity: 1; }
-}
-
-.screen-stack {
-	display: flex;
-	flex-direction: column-reverse;
-	align-items: center;
-}
-
-.screen-icon {
-	width: 76px;
-	height: 52px;
-	background: #1a2744;
-	border-radius: 5px;
-	border: 2px solid #2e3f6b;
-	margin-top: -12px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	opacity: 0;
-	animation: screenPop 0.3s ease forwards;
-}
-
-.screen-icon:first-child {
-	margin-top: 0;
-}
-
-@keyframes screenPop {
-	0%   { opacity: 0; transform: scale(0.85); }
-	70%  { transform: scale(1.05); }
-	100% { opacity: 1; transform: scale(1); }
-}
-
-.screen-inner {
-	width: 56px;
-	height: 38px;
-	background: #0f172a;
-	border-radius: 3px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 6px;
-	position: relative;
-}
-
-.screen-play {
-	width: 0;
-	height: 0;
-	border-top: 6px solid transparent;
-	border-bottom: 6px solid transparent;
-	border-left: 10px solid #E50914;
-}
-
-.screen-dots {
-	display: flex;
-	flex-direction: column;
-	gap: 3px;
-	position: absolute;
-	right: 5px;
-	top: 50%;
-	transform: translateY(-50%);
-}
-
-.screen-dot {
-	width: 3px;
-	height: 3px;
-	background: #4a5568;
-	border-radius: 50%;
-}
-
-.seasons-count {
-	font-family: var(--font-body);
-	font-size: 0.95rem;
-	font-weight: 500;
-	color: var(--color-text);
-}
-
-.seasons-label {
-	font-family: var(--font-body);
-	font-size: 0.75rem;
-	color: var(--color-text-muted, #888);
-	text-align: center;
-}
-
-.seasons-tooltip {
 	position: fixed;
 	background: rgba(26, 26, 26, 0.95);
 	color: white;
