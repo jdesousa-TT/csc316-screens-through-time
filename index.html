@@ -186,10 +186,12 @@
 	<div class="page-content viz-page">
 		<h2 class="viz-title">Platform Dominance in Global Streaming Catalogs</h2>
 		<p class="viz-subtitle">Comparing where Netflix, Amazon Prime, and Disney+ source titles worldwide</p>
+
 		<div class="viz-layout">
 			<div class="viz-container" id="viz-streaming-map" style="height:auto; min-height:520px;">
 				<p class="placeholder-text">Loading visualization...</p>
 			</div>
+
 			<div class="viz-sidebar">
 				<div>
 					<label for="platformFilter">Platform</label>
@@ -200,6 +202,7 @@
 						<option value="Disney+">Disney+</option>
 					</select>
 				</div>
+
 				<div>
 					<label for="typeFilter">Type</label>
 					<select id="typeFilter">
@@ -207,6 +210,18 @@
 						<option value="TV">TV</option>
 						<option value="Film">Film</option>
 					</select>
+				</div>
+
+				<div>
+					<label for="yearSlider">Release year: <span id="yearLabel">2023</span></label>
+					<input
+						type="range"
+						id="yearSlider"
+						min="2000"
+						max="2023"
+						step="1"
+						value="2023"
+					/>
 				</div>
 			</div>
 		</div>

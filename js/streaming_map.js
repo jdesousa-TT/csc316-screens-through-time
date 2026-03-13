@@ -43,6 +43,9 @@ const platformColors = {
   "Disney+": "#7c4fb6"
 };
 
+// year state
+let selectedYear = 2023;
+
 // Representative coordinates for countries used in CSVs
 const countryCoords = {
   "United States": [-98, 39],
@@ -197,6 +200,9 @@ function buildPlatformCountryCounts(datasets) {
       const format = normalizeType(row.type);
       if (format !== "TV" && format !== "Film") return;
 
+      const releaseYear = +row.release_year;
+      if (!Number.isFinite(releaseYear) || releaseYear > selectedYear) return;
+
       const countries = splitCountries(row.country).filter(country => countryCoords[country]);
 
       countries.forEach(country => {
@@ -223,12 +229,12 @@ function buildPlatformCountryCounts(datasets) {
 // Assigns circle size based on a platform's rank within a country (largest, middle, smallest).
 function rankRadius(rank, count) {
   if (count <= 0) return 0;
-  if (rank === 1) return 11;
-  if (rank === 2) return 7.5;
-  return 4.8;
+  if (rank === 1) return 12;
+  if (rank === 2) return 8;
+  return 4;
 }
 
-// offsets in pixels around each country point
+// Offsets each platform's pin slightly so the three platform circles do not overlap exactly.
 function platformOffset(platform) {
   if (platform === "Netflix") return { dx: 0, dy: -10 };
   if (platform === "Amazon Prime") return { dx: 9, dy: 7 };
@@ -281,7 +287,12 @@ function wranglePins() {
         platform: d.platform,
         count: d.count,
         rank: rankLookup.get(d.platform),
-        coords
+        coords,
+        countsByPlatform: {
+          Netflix: platformMap.get("Netflix") || 0,
+          "Amazon Prime": platformMap.get("Amazon Prime") || 0,
+          "Disney+": platformMap.get("Disney+") || 0
+        }
       });
     });
   });
@@ -350,9 +361,11 @@ function updatePins() {
         .classed("hidden", false)
         .html(`
           <strong>${d.country}</strong>
-          <div><b>Platform:</b> ${d.platform}</div>
-          <div><b>Titles:</b> ${d.count}</div>
-          <div><b>Relative size in this country:</b> ${d.rank === 1 ? "largest" : d.rank === 2 ? "middle" : "smallest"}</div>
+          <div><b>Netflix:</b> ${d.countsByPlatform["Netflix"]}</div>
+          <div><b>Amazon Prime:</b> ${d.countsByPlatform["Amazon Prime"]}</div>
+          <div><b>Disney+:</b> ${d.countsByPlatform["Disney+"]}</div>
+          <div><b>Largest here:</b> ${d.rank === 1 ? d.platform : "Not this platform"}</div>
+          <div><b>Year filter:</b> up to ${selectedYear}</div>
         `);
     })
     .on("mousemove", function(event) {
@@ -394,7 +407,6 @@ function drawLabels() {
     .attr("y", 38)
     .text("Drag to rotate the globe");
 
-  // small platform key in corner
   const key = labelGroup.append("g")
     .attr("transform", `translate(${width - 180}, 50)`);
 
@@ -463,16 +475,34 @@ Promise.all([
 ]).then(([world, netflix, amazon, disney]) => {
   worldCountries = topojson.feature(world, world.objects.countries);
 
-  allCounts = buildPlatformCountryCounts([
-    { platform: "Netflix", rows: netflix },
-    { platform: "Amazon Prime", rows: amazon },
-    { platform: "Disney+", rows: disney }
-  ]);
+  const yearLabel = document.getElementById("yearLabel");
+  const yearSlider = document.getElementById("yearSlider");
+
+  if (yearLabel) yearLabel.textContent = selectedYear;
+  if (yearSlider) yearSlider.value = selectedYear;
+
+  function rebuildAndRender() {
+    allCounts = buildPlatformCountryCounts([
+      { platform: "Netflix", rows: netflix },
+      { platform: "Amazon Prime", rows: amazon },
+      { platform: "Disney+", rows: disney }
+    ]);
+
+    updatePins();
+  }
 
   drawGlobe();
-  updatePins();
+  rebuildAndRender();
   drawLabels();
 
   document.getElementById("platformFilter").addEventListener("change", updatePins);
   document.getElementById("typeFilter").addEventListener("change", updatePins);
+
+  if (yearSlider) {
+    yearSlider.addEventListener("input", function() {
+      selectedYear = +this.value;
+      if (yearLabel) yearLabel.textContent = selectedYear;
+      rebuildAndRender();
+    });
+  }
 });
