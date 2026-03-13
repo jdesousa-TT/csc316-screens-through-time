@@ -68,12 +68,6 @@ function initVisualization(pageIndex) {
                 initializedViz.add(pageIndex);
             }
             break;
-        case 3:
-            if (typeof initTradingCards === 'function') {
-                initTradingCards();
-                initializedViz.add(pageIndex);
-            }
-            break;
         case 4:
             d3.csv('data/netflix_titles.csv').then(function (data) {
                 new LanguageRepresentation('viz-language', data);
@@ -108,16 +102,6 @@ function initVisualization(pageIndex) {
             });
             break;
     }
-}
-
-/**
- * Navigate to Director Cards with a genre filter.
- * Called from genre_playoffs.js when the champion is clicked.
- */
-function goToFilteredCards(genre) {
-    window.selectedGenreFilter = genre || null;
-    initializedViz.delete(3);
-    goToPage(3);
 }
 
 /* ── Hub connector lines (SVG drawn from live card positions) ── */
@@ -196,6 +180,5 @@ window.addEventListener('resize', () => {
 /* ── Pre-initialize heavy visualizations ── */
 document.addEventListener('DOMContentLoaded', () => {
     initVisualization(2);
-    initVisualization(3);
     initVisualization(6);
 });

@@ -437,6 +437,102 @@ function ensurePlayoffRuntimeStyles() {
             }
         }
 
+        /* Director popup overlay */
+        .genre-director-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            overflow-y: auto;
+            padding: 1rem;
+            transition: opacity 0.25s ease;
+            backdrop-filter: blur(4px);
+        }
+        .genre-director-backdrop.visible { opacity: 1; }
+
+        .genre-director-popup {
+            position: relative;
+            background: var(--color-bg);
+            border-radius: 24px;
+            padding: 1.8rem 2rem 1.6rem;
+            max-width: 1160px;
+            width: 96vw;
+            max-height: 96vh;
+            overflow-y: auto;
+            box-shadow: 0 28px 56px rgba(0,0,0,0.25);
+            transform: translateY(16px) scale(0.96);
+            transition: transform 0.35s cubic-bezier(0.22,1,0.36,1);
+        }
+        .genre-director-backdrop.visible .genre-director-popup {
+            transform: translateY(0) scale(1);
+        }
+
+        .genre-director-close {
+            position: absolute;
+            top: 16px; right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            line-height: 1;
+            color: #aaa;
+            cursor: pointer;
+            transition: color 0.15s;
+            z-index: 1;
+        }
+        .genre-director-close:hover { color: #333; }
+
+        .genre-director-header {
+            text-align: center;
+            margin-bottom: 1.4rem;
+        }
+        .genre-director-genre {
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            font-weight: 500;
+            line-height: 1;
+            margin-bottom: 0.3rem;
+        }
+        .genre-director-sub {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+        }
+        .genre-director-cards {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: center;
+            gap: var(--space-md);
+            padding: var(--space-sm) 0;
+        }
+        .genre-director-cards .trading-card {
+            opacity: 1;
+            transform: none;
+            animation: none;
+            width: 0;
+            flex: 1 1 0;
+            min-width: 0;
+            max-width: 340px;
+        }
+        .genre-director-empty {
+            text-align: center;
+            color: #999;
+            font-size: 0.9rem;
+            padding: 2rem 0;
+        }
+
+        .genre-playoffs-click-tip {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--color-text-muted);
+            margin: 0.6rem 0 0;
+            letter-spacing: 0.03em;
+            opacity: 0;
+            animation: playoffReveal 0.5s ease 0.3s forwards;
+        }
+
         @media (max-width: 768px) {
             .genre-playoffs-intro {
                 flex-direction: column;
@@ -476,6 +572,20 @@ function ensurePlayoffRuntimeStyles() {
             .genre-playoffs-connectors {
                 display: none;
             }
+
+            .genre-director-popup {
+                padding: 1.2rem 0.8rem;
+            }
+            .genre-director-cards {
+                gap: var(--space-sm);
+            }
+            .genre-director-cards .trading-card .first-name { font-size: 1.4rem; }
+            .genre-director-cards .trading-card .last-name  { font-size: 1rem; }
+            .genre-director-cards .trading-card .total-badge { width: 44px; height: 44px; }
+            .genre-director-cards .trading-card .badge-number { font-size: 1.1rem; }
+            .genre-director-cards .trading-card .photo-container { width: 100px; height: 130px; }
+            .genre-director-cards .trading-card .progress-container { display: none; }
+            .genre-director-cards .trading-card .genre-name { width: auto; }
         }
     `;
 
@@ -536,6 +646,54 @@ function buildLanguagesByGenre(metadataRows) {
     return map;
 }
 
+function buildDirectorsByGenre(rows) {
+    const dirMap = new Map();
+
+    rows.forEach(row => {
+        if (!row.director || !row.director.trim()) return;
+        const directors = row.director.split(',').map(d => d.trim()).filter(Boolean);
+        const rawGenres = row.listed_in ? row.listed_in.split(',').map(g => g.trim()) : [];
+        const normGenres = getNormalizedGenres(row.listed_in);
+
+        directors.forEach(dir => {
+            if (!dirMap.has(dir)) dirMap.set(dir, { name: dir, totalTitles: 0, rawGenres: new Map(), normGenres: new Map() });
+            const d = dirMap.get(dir);
+            d.totalTitles++;
+            rawGenres.forEach(g => d.rawGenres.set(g, (d.rawGenres.get(g) || 0) + 1));
+            normGenres.forEach(g => d.normGenres.set(g, (d.normGenres.get(g) || 0) + 1));
+        });
+    });
+
+    const fullProfiles = new Map();
+    dirMap.forEach((d, name) => {
+        fullProfiles.set(name, {
+            name: d.name,
+            totalTitles: d.totalTitles,
+            topGenres: [...d.rawGenres.entries()]
+                .map(([genre, count]) => ({ genre, count }))
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 3)
+        });
+    });
+
+    const byGenre = new Map();
+    dirMap.forEach((d, name) => {
+        d.normGenres.forEach((count, genre) => {
+            if (!byGenre.has(genre)) byGenre.set(genre, []);
+            byGenre.get(genre).push({ name, genreCount: count });
+        });
+    });
+
+    const result = new Map();
+    byGenre.forEach((directors, genre) => {
+        result.set(genre, directors
+            .sort((a, b) => b.genreCount - a.genreCount)
+            .slice(0, 3)
+            .map(d => fullProfiles.get(d.name)));
+    });
+    return result;
+}
+
 function initGenrePlayoffs() {
     const container = d3.select('#viz-1');
 
@@ -549,8 +707,10 @@ function initGenrePlayoffs() {
         d3.csv('data/movies/movies_metadata.csv')
     ]).then(([netflixTitles, disneyTitles, amazonTitles, metadata]) => {
         const langByGenre = buildLanguagesByGenre(metadata);
-        const stats = buildGenrePlayoffData([...netflixTitles, ...disneyTitles, ...amazonTitles], langByGenre);
-        renderGenrePlayoffs(container, stats);
+        const allTitles = [...netflixTitles, ...disneyTitles, ...amazonTitles];
+        const stats = buildGenrePlayoffData(allTitles, langByGenre);
+        const dirsByGenre = buildDirectorsByGenre(allTitles);
+        renderGenrePlayoffs(container, stats, dirsByGenre);
     }).catch(error => {
         console.error('Error loading genre playoff data:', error);
         container.html('<p class="placeholder-text">Error loading genre playoffs</p>');
@@ -677,7 +837,7 @@ function pickWinner(first, second) {
     return first.count >= second.count ? first : second;
 }
 
-function renderGenrePlayoffs(container, stats) {
+function renderGenrePlayoffs(container, stats, dirsByGenre) {
     container.html('');
 
     const state = {
@@ -723,7 +883,7 @@ function renderGenrePlayoffs(container, stats) {
 
     actions.append('p')
         .attr('class', 'genre-playoffs-footnote')
-        .text('Hover for top countries.');
+        .text('Hover for stats · Drag to fill bracket');
 
     const pool = shell.append('div')
         .attr('class', 'genre-pool');
@@ -842,7 +1002,11 @@ function renderGenrePlayoffs(container, stats) {
             .on('mousemove', moveTooltip)
             .on('mouseleave', hideTooltip)
             .on('focus', (event, d) => showTooltip(event, d))
-            .on('blur', hideTooltip);
+            .on('blur', hideTooltip)
+            .on('click', (event, d) => {
+                if (event.defaultPrevented) return;
+                showDirectorPopup(d, dirsByGenre);
+            });
 
         merged.html('');
         merged.append('span')
@@ -862,6 +1026,13 @@ function renderGenrePlayoffs(container, stats) {
         renderPool();
         syncControls();
         requestAnimationFrame(drawConnectors);
+
+        shell.selectAll('.genre-playoffs-click-tip').remove();
+        if (state.winners.champion) {
+            shell.append('p')
+                .attr('class', 'genre-playoffs-click-tip')
+                .text('Click any genre to see their top directors');
+        }
     }
 
     function renderQuarterfinals() {
@@ -981,12 +1152,8 @@ function renderGenrePlayoffs(container, stats) {
 
         callout.append('button')
             .attr('class', 'genre-playoffs-callout-btn')
-            .text(`See ${champion.genre} Directors →`)
-            .on('click', () => {
-                if (typeof goToFilteredCards === 'function') {
-                    goToFilteredCards(champion.genre);
-                }
-            });
+            .text(`Top ${champion.genre} Directors →`)
+            .on('click', () => showDirectorPopup(champion, dirsByGenre));
     }
 
     function renderGenreCard(parent, genre, className, removable, showCount) {
@@ -999,7 +1166,11 @@ function renderGenrePlayoffs(container, stats) {
             .on('mousemove', moveTooltip)
             .on('mouseleave', hideTooltip)
             .on('focus', (event) => showTooltip(event, genre))
-            .on('blur', hideTooltip);
+            .on('blur', hideTooltip)
+            .on('click', (event) => {
+                if (event.defaultPrevented) return;
+                showDirectorPopup(genre, dirsByGenre);
+            });
 
         if (removable && !state.revealing) {
             card.attr('draggable', true)
@@ -1259,5 +1430,68 @@ function shuffleArray(items) {
     }
     return copy;
 }
+
+function showDirectorPopup(genre, dirsByGenre) {
+    d3.select('.genre-director-backdrop').remove();
+
+    const directors = dirsByGenre.get(genre.genre) || [];
+
+    const backdrop = d3.select('body').append('div')
+        .attr('class', 'genre-director-backdrop')
+        .on('click', function (event) {
+            if (event.target === this) closeDirectorPopup();
+        });
+
+    const popup = backdrop.append('div')
+        .attr('class', 'genre-director-popup');
+
+    popup.append('button')
+        .attr('class', 'genre-director-close')
+        .html('&times;')
+        .on('click', closeDirectorPopup);
+
+    const header = popup.append('div')
+        .attr('class', 'genre-director-header');
+
+    header.append('div')
+        .attr('class', 'genre-director-genre')
+        .style('color', genre.color)
+        .text(genre.genre);
+
+    header.append('div')
+        .attr('class', 'genre-director-sub')
+        .text(directors.length
+            ? `Top ${directors.length} directors by ${genre.genre} titles`
+            : 'No director data available for this genre');
+
+    if (!directors.length) {
+        popup.append('div')
+            .attr('class', 'genre-director-empty')
+            .text('Director information not available.');
+    } else {
+        const cardsWrap = popup.append('div')
+            .attr('class', 'genre-director-cards');
+
+        directors.forEach((dir, i) => {
+            if (typeof createTradingCard === 'function') {
+                createTradingCard(cardsWrap, dir, i);
+            }
+        });
+    }
+
+    requestAnimationFrame(() => backdrop.classed('visible', true));
+}
+
+function closeDirectorPopup() {
+    const backdrop = d3.select('.genre-director-backdrop');
+    backdrop.classed('visible', false);
+    setTimeout(() => backdrop.remove(), 300);
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.querySelector('.genre-director-backdrop')) {
+        closeDirectorPopup();
+    }
+});
 
 window.initGenrePlayoffs = initGenrePlayoffs;
