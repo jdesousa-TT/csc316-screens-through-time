@@ -293,7 +293,7 @@ body {
 	font-size: 1.05rem;
 	font-style: italic;
 	color: var(--color-text-muted);
-	max-width: 660px;
+	max-width: 960px;
 	text-align: center;
 	margin: 0 0 var(--space-md);
 	line-height: 1.6;
