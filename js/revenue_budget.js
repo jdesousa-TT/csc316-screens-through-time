@@ -17,7 +17,11 @@ function rbInjectStyles() {
       align-items: stretch;
       padding: 24px 24px 16px !important;
       box-sizing: border-box;
-      overflow: visible;
+      overflow: hidden;
+    }
+    #viz-4 svg {
+      display: block;
+      max-width: 100%;
     }
 
     /* ── Controls (in sidebar) ── */
@@ -190,7 +194,19 @@ function initRevenueBudget() {
     .catch(err => console.error('Failed to load movies_metadata.csv', err));
 }
 
-// Process CSV — return ALL valid films (slider will filter) 
+const RB_LANG_LABELS = {
+  en:'English', fr:'French', es:'Spanish', ja:'Japanese', ko:'Korean',
+  de:'German', hi:'Hindi', zh:'Chinese', it:'Italian', ru:'Russian',
+  pt:'Portuguese', cn:'Chinese', ta:'Tamil', te:'Telugu', tr:'Turkish',
+};
+function rbLangLabel(code) { return RB_LANG_LABELS[code] || code.toUpperCase(); }
+
+function rbParseGenres(raw) {
+  if (!raw || raw.length < 3) return [];
+  try { return JSON.parse(raw.replace(/'/g, '"')).map(g => g.name).filter(Boolean); }
+  catch { return []; }
+}
+
 function rbProcess(rows) {
   return rows
     .map(d => {
@@ -198,7 +214,9 @@ function rbProcess(rows) {
       const revenue = parseFloat(d.revenue) || 0;
       const title   = (d.title || d.original_title || '').trim() || 'Unknown';
       const year    = (d.release_date || '').slice(0, 4) || '—';
-      return { title, budget, revenue, year };
+      const genres  = rbParseGenres(d.genres);
+      const lang    = (d.original_language || '').trim();
+      return { title, budget, revenue, year, genres, lang };
     })
     .filter(d => d.budget >= 10_000_000 && d.revenue > 0)
     .map(d => ({ ...d, isLoss: d.revenue < d.budget, roi: (d.revenue - d.budget) / d.budget * 100 }));
@@ -232,6 +250,78 @@ function rbSample(films, maxN = 20) {
 const rbFmt = v =>
   v >= 1e9 ? `$${(v / 1e9).toFixed(1)}B` :
   v >= 1e6 ? `$${(v / 1e6).toFixed(0)}M` : `$${(v/1e3).toFixed(0)}K`;
+
+function rbRenderInsights(allFilms, sidebarSel) {
+  let insightDiv = sidebarSel.select('#rb-insights');
+  if (insightDiv.empty()) {
+    insightDiv = sidebarSel.append('div').attr('id', 'rb-insights')
+      .style('margin-top', '18px')
+      .style('font-size', '11px')
+      .style('color', '#888')
+      .style('line-height', '1.55');
+  }
+  insightDiv.html('');
+
+  // Genre ROI (average)
+  const genreROI = new Map();
+  allFilms.forEach(f => {
+    f.genres.forEach(g => {
+      if (!genreROI.has(g)) genreROI.set(g, { total: 0, n: 0 });
+      const entry = genreROI.get(g);
+      entry.total += f.roi;
+      entry.n++;
+    });
+  });
+  const topGenres = [...genreROI.entries()]
+    .map(([g, v]) => ({ genre: g, avgROI: v.total / v.n, n: v.n }))
+    .filter(d => d.n >= 5)
+    .sort((a, b) => b.avgROI - a.avgROI)
+    .slice(0, 5);
+
+  if (topGenres.length) {
+    insightDiv.append('div')
+      .style('letter-spacing', '0.08em')
+      .style('text-transform', 'uppercase')
+      .style('font-size', '10px')
+      .style('color', '#aaa')
+      .style('margin-bottom', '6px')
+      .text('Avg ROI by Genre');
+    const list = insightDiv.append('div').style('display', 'flex').style('flex-direction', 'column').style('gap', '3px');
+    topGenres.forEach(g => {
+      const isPos = g.avgROI >= 0;
+      list.append('div')
+        .style('display', 'flex').style('justify-content', 'space-between')
+        .html(`<span>${g.genre}</span><span style="color:${isPos ? '#4a9e6b' : '#c0504a'};font-weight:500">${isPos ? '+' : ''}${g.avgROI.toFixed(0)}%</span>`);
+    });
+  }
+
+  // Language revenue
+  const langRev = new Map();
+  allFilms.forEach(f => {
+    if (!f.lang) return;
+    langRev.set(f.lang, (langRev.get(f.lang) || 0) + f.revenue);
+  });
+  const topLangs = [...langRev.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+
+  if (topLangs.length) {
+    insightDiv.append('div')
+      .style('letter-spacing', '0.08em')
+      .style('text-transform', 'uppercase')
+      .style('font-size', '10px')
+      .style('color', '#aaa')
+      .style('margin-top', '14px')
+      .style('margin-bottom', '6px')
+      .text('Revenue by Language');
+    const list2 = insightDiv.append('div').style('display', 'flex').style('flex-direction', 'column').style('gap', '3px');
+    topLangs.forEach(([code, rev]) => {
+      list2.append('div')
+        .style('display', 'flex').style('justify-content', 'space-between')
+        .html(`<span>${rbLangLabel(code)}</span><span style="font-weight:500">${rbFmt(rev)}</span>`);
+    });
+  }
+}
 
 // Draw 
 function rbDraw(allFilms) {
@@ -332,7 +422,12 @@ function rbDraw(allFilms) {
   const W      = fullW - margin.left - margin.right;
   const H      = fullH - margin.top  - margin.bottom;
 
-  const svg = container.append('svg').attr('width', fullW).attr('height', fullH);
+  const svg = container.append('svg')
+    .attr('viewBox', `0 0 ${fullW} ${fullH}`)
+    .attr('preserveAspectRatio', 'xMidYMid meet')
+    .style('width', '100%')
+    .style('height', 'auto')
+    .style('max-height', '80vh');
 
   // Defs
   const defs = svg.append('defs');
@@ -413,6 +508,9 @@ function rbDraw(allFilms) {
     // 2. Apply profit/loss filter
     if (active === 'profit') visible = visible.filter(d => !d.isLoss);
     if (active === 'loss')   visible = visible.filter(d => d.isLoss);
+
+    // Update sidebar insight stats with all visible films (before sampling)
+    rbRenderInsights(visible, sidebar);
 
     // 3. Sample to max 20 for readability
     const data = rbSample(visible, 20);

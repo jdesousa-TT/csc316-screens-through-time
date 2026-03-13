@@ -9,7 +9,7 @@
 	<!-- Load CSS libraries -->
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
-	<!-- Google Fonts - Distinctive typography -->
+	<!-- Google Fonts -->
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -19,11 +19,12 @@
 </head>
 
 <body>
-<!-- Page Container -->
-<div class="story-container">
 
-	<!-- Title Page (Page 0) -->
-	<section class="page active" data-page="0">
+<!-- ─── Scroll-snap landing: Title + Hub ─── -->
+<div class="scroll-landing" id="scroll-landing">
+
+	<!-- Page 0 — Title -->
+	<section class="snap-section" data-page="0">
 		<div class="page-content title-page">
 			<div class="title-wrapper">
 				<span class="course-code">CSC316</span>
@@ -49,157 +50,239 @@
 			</div>
 		</div>
 
-		<!-- Navigation Arrow -->
-		<button class="nav-arrow next-arrow" onclick="nextPage()">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-				<path d="M5 12h14M12 5l7 7-7 7"/>
+		<div class="scroll-hint" aria-hidden="true">
+			<span class="scroll-hint-label">Story Map</span>
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="24" height="24">
+				<path d="M6 9l6 6 6-6"/>
 			</svg>
-		</button>
-	</section>
-
-	<!-- Visualization Page 1 - Genre Playoffs -->
-	<section class="page" data-page="1">
-		<div class="page-content viz-page genre-playoffs-page">
-			<h2 class="viz-title">Genre Playoffs</h2>
-			<p class="viz-subtitle">Drag genres into the bracket, or randomize, then reveal winners.</p>
-			<div class="viz-container genre-playoffs-viz" id="viz-1">
-				<p class="placeholder-text">Loading genre playoffs...</p>
-			</div>
 		</div>
-
-		<button class="nav-arrow prev-arrow" onclick="prevPage()">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-				<path d="M19 12H5M12 19l-7-7 7-7"/>
-			</svg>
-		</button>
-		<button class="nav-arrow next-arrow" onclick="nextPage()">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-				<path d="M5 12h14M12 5l7 7-7 7"/>
-			</svg>
-		</button>
 	</section>
 
-	<!-- Visualization Page 2 - Country Playoffs -->
-	<section class="page" data-page="2">
-		<div class="page-content viz-page genre-playoffs-page">
-			<h2 class="viz-title">Country Playoffs</h2>
-			<p class="viz-subtitle">Drag countries into the bracket, or randomize, then reveal winners.</p>
-			<div class="viz-container genre-playoffs-viz" id="viz-2">
-				<p class="placeholder-text">Loading country playoffs...</p>
-			</div>
-		</div>
+	<!-- Page 1 — Story Map Hub -->
+	<section class="snap-section" data-page="1">
+		<div class="page-content story-hub-page">
+			<h2 class="hub-title">Our Data Story</h2>
+			<p class="hub-insight">Globalization drives the entertainment industry &mdash; content that reaches across languages and regions unlocks greater revenue and viewership.</p>
 
-		<button class="nav-arrow prev-arrow" onclick="prevPage()">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-				<path d="M19 12H5M12 19l-7-7 7-7"/>
-			</svg>
-		</button>
-		<button class="nav-arrow next-arrow" onclick="nextPage()">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-				<path d="M5 12h14M12 5l7 7-7 7"/>
-			</svg>
-		</button>
-	</section>
+			<div class="hub-arc" id="hub-arc">
+				<svg class="hub-connectors" id="hub-connectors" preserveAspectRatio="xMidYMid meet"></svg>
 
-	<!-- Visualization Page 3 - Director Trading Cards -->
-	<section class="page" data-page="3">
-		<div class="page-content viz-page trading-cards-page">
-			<h2 class="viz-title">Director Trading Cards</h2>
-			<p class="viz-subtitle">Top 10 Disney+ Directors by Number of Titles</p>
-			<div class="viz-container trading-cards-viz" id="viz-3">
-				<p class="placeholder-text">Loading trading cards...</p>
-			</div>
-		</div>
+				<div class="hub-grid">
+					<div class="hub-node hub-pos-hook" style="--node-accent:#C45D3A" onclick="goToPage(2)" data-hub-id="hook">
+						<span class="hub-stage">Hook</span>
+						<span class="hub-viz-name">Genre Playoffs</span>
+						<span class="hub-desc">Explore genre popularity &amp; meet top directors</span>
+					</div>
 
-		<button class="nav-arrow prev-arrow" onclick="prevPage()">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-				<path d="M19 12H5M12 19l-7-7 7-7"/>
-			</svg>
-		</button>
-		<button class="nav-arrow next-arrow" onclick="nextPage()">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-				<path d="M5 12h14M12 5l7 7-7 7"/>
-			</svg>
-		</button>
-	</section>
+					<div class="hub-node hub-pos-ri1" style="--node-accent:#4db89e" onclick="goToPage(4)" data-hub-id="ri1">
+						<span class="hub-stage">Rising Insight</span>
+						<span class="hub-viz-name">Language Representation</span>
+						<span class="hub-desc">Language diversity on streaming over time</span>
+					</div>
 
-	<!-- Visualization Page 4 - Revenue vs Budget -->
-	<section class="page" data-page="4">
-		<div class="page-content viz-page">
-			<h2 class="viz-title">Budget vs Revenue</h2>
-			<p class="viz-subtitle">Did the budget pay off? Arrows show each film's return on investment</p>
-			<div class="viz-layout">
-				<div class="viz-container arrow-chart-container" id="viz-4">
-					<p class="placeholder-text">Loading visualization...</p>
+					<div class="hub-node hub-pos-ri2" style="--node-accent:#4db89e" onclick="goToPage(5)" data-hub-id="ri2">
+						<span class="hub-stage">Rising Insight</span>
+						<span class="hub-viz-name">Genre &amp; Language</span>
+						<span class="hub-desc">How genres connect to languages of origin</span>
+					</div>
+
+					<div class="hub-node hub-pos-aha" style="--node-accent:#c9a84c" onclick="goToPage(6)" data-hub-id="aha">
+						<span class="hub-stage">Aha Moment</span>
+						<span class="hub-viz-name">Budget vs Revenue</span>
+						<span class="hub-desc">Genre &amp; language trends drive ROI</span>
+					</div>
+
+					<div class="hub-node hub-pos-res" style="--node-accent:#4a7ec9" onclick="goToPage(7)" data-hub-id="res">
+						<span class="hub-stage">Resolution</span>
+						<span class="hub-viz-name">Global Streaming Map</span>
+						<span class="hub-desc">Platform catalogs around the world</span>
+					</div>
 				</div>
-				<div class="viz-sidebar" id="rb-sidebar"></div>
 			</div>
+
 		</div>
 
-		<button class="nav-arrow prev-arrow" onclick="prevPage()">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-				<path d="M19 12H5M12 19l-7-7 7-7"/>
+		<div class="scroll-hint" aria-hidden="true">
+			<span class="scroll-hint-label">Conclusion</span>
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="24" height="24">
+				<path d="M6 9l6 6 6-6"/>
 			</svg>
-		</button>
-		<button class="nav-arrow next-arrow" onclick="nextPage()">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-				<path d="M5 12h14M12 5l7 7-7 7"/>
-			</svg>
-		</button>
+		</div>
 	</section>
 
-	<!-- Visualization Page 5 - Language Representation (Maryam - S19) -->
-	<section class="page" data-page="5">
-		<div class="page-content viz-page">
-			<h2 class="viz-title">Language Representation Over Time</h2>
-			<p class="viz-subtitle">How has the diversity of languages on Netflix changed across decades?</p>
-			<div class="viz-container" id="viz-language">
+	<!-- Page 2 (scroll) — Conclusion -->
+	<section class="snap-section conclusion-section" data-page="conclusion">
+		<div class="page-content conclusion-page">
+			<h2 class="conclusion-title">Conclusion</h2>
+			<p class="conclusion-body">
+				Your conclusive write-up goes here.
+			</p>
+		</div>
+	</section>
+</div>
+
+<!-- ─── Overlay viz pages (fixed, toggled via JS) ─── -->
+
+<!-- Page 2 — Genre Playoffs (Hook) -->
+<section class="overlay-page" data-page="2">
+	<button class="hub-back-btn" onclick="goToStoryHub()">
+		<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+		Story Map
+	</button>
+	<button class="viz-nav viz-nav-next" onclick="goToPage(4)">
+		Language Representation
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M9 6l6 6-6 6"/></svg>
+	</button>
+	<div class="page-content viz-page genre-playoffs-page">
+		<h2 class="viz-title">Genre Playoffs</h2>
+		<p class="viz-subtitle">Drag genres into the bracket, or randomize, then reveal winners.</p>
+		<div class="viz-explanation">
+			<button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
+				About this visualization
+			</button>
+			<div class="viz-explanation-body"><div class="viz-explanation-body-inner">
+				<p>Film and television are often grouped into genres that suggest a wide variety of storytelling styles. With so many genres appearing in global media catalogs such as Netflix, Prime, and Disney+, it can seem as though audiences are exposed to a diverse set of production backgrounds.</p>
+				<p style="margin-top:0.6rem">This visualization turns genre popularity into a &ldquo;playoff&rdquo; bracket. Drag genres into the bracket to compare how widely different categories of content appear across countries. As you explore, hover over each genre to see where these titles are produced and which languages dominate. You can also click on a genre to discover the directors behind many of these titles.</p>
+				<p style="margin-top:0.6rem">At first glance, the bracket simply highlights which genres are most widely produced. But a closer look reveals a pattern: across many genres, the same production hubs and languages appear repeatedly, raising a deeper question about how diverse global media production actually is.</p>
+			</div></div>
+		</div>
+		<div class="viz-container genre-playoffs-viz" id="viz-1">
+			<p class="placeholder-text">Loading genre playoffs...</p>
+		</div>
+	</div>
+</section>
+
+<!-- Page 4 — Language Representation -->
+<section class="overlay-page" data-page="4">
+	<button class="hub-back-btn" onclick="goToStoryHub()">
+		<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+		Story Map
+	</button>
+	<button class="viz-nav viz-nav-prev" onclick="goToPage(2)">
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M15 6l-6 6 6 6"/></svg>
+		Genre Playoffs
+	</button>
+	<button class="viz-nav viz-nav-next" onclick="goToPage(5)">
+		Genre &amp; Language
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M9 6l6 6-6 6"/></svg>
+	</button>
+	<div class="page-content viz-page">
+		<h2 class="viz-title">Language Representation Over Time</h2>
+		<p class="viz-subtitle">How has the diversity of languages on Netflix changed across decades?</p>
+		<div class="viz-explanation">
+			<button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
+				About this visualization
+			</button>
+			<div class="viz-explanation-body"><div class="viz-explanation-body-inner">
+				<p>For decades, English was the default language of all media, and the stories that reached the world were usually almost American or British. But scroll through Netflix today, and it is completely different.
+					This visualization tracks the language origins of streaming content across four decades: the 1980s through the 2010s. Each small square represents a portion of titles from that decade. The pattern that emerges is that English is still the dominant language, but it's so much less so. South Asian and East Asian content has grown substantially since the 1980s, reflecting the rise of Bollywood, Korean Dramas, and anime. Spanish-language content has also grown alongside Arabic and Turkish titles.</p>
+			</div></div>
+		</div>
+		<div class="viz-container" id="viz-language">
+			<p class="placeholder-text">Loading visualization...</p>
+		</div>
+	</div>
+</section>
+
+<!-- Page 5 — Genre–Language Alluvial -->
+<section class="overlay-page" data-page="5">
+	<button class="hub-back-btn" onclick="goToStoryHub()">
+		<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+		Story Map
+	</button>
+	<button class="viz-nav viz-nav-prev" onclick="goToPage(4)">
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M15 6l-6 6 6 6"/></svg>
+		Language Representation
+	</button>
+	<button class="viz-nav viz-nav-next" onclick="goToPage(6)">
+		Budget vs Revenue
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M9 6l6 6-6 6"/></svg>
+	</button>
+	<div class="page-content viz-page">
+		<h2 class="viz-title">Genre &amp; Language Connections</h2>
+		<p class="viz-subtitle">How do film genres relate to their original language? Flow width shows the number of films.</p>
+		<div class="viz-explanation">
+			<button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
+				About this visualization
+			</button>
+			<div class="viz-explanation-body"><div class="viz-explanation-body-inner">
+				<p>Placeholder explanation for Genre &amp; Language Connections. Describe the relationship between genres and languages of origin and what this reveals.</p>
+			</div></div>
+		</div>
+		<div class="viz-layout">
+			<div class="viz-container" id="viz-genre-lang" style="height:auto; min-height:520px;">
 				<p class="placeholder-text">Loading visualization...</p>
 			</div>
+			<div class="viz-sidebar" id="gl-sidebar"></div>
 		</div>
-		<button class="nav-arrow prev-arrow" onclick="prevPage()">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-				<path d="M19 12H5M12 19l-7-7 7-7"/>
-			</svg>
-		</button>
-		<button class="nav-arrow next-arrow" onclick="nextPage()">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-				<path d="M5 12h14M12 5l7 7-7 7"/>
-			</svg>
-		</button>
-	</section>
+	</div>
+</section>
 
-	<!-- Visualization Page 6 - Netflix Seasons (Maryam - S17) -->
-	<section class="page" data-page="6">
-		<div class="page-content viz-page">
-			<h2 class="viz-title">How Many Seasons Do Netflix Shows Have?</h2>
-			<p class="viz-subtitle">Streaming platforms favour short, limited series over long-running shows</p>
-			<div class="viz-container" id="viz-seasons">
+<!-- Page 6 — Revenue vs Budget -->
+<section class="overlay-page" data-page="6">
+	<button class="hub-back-btn" onclick="goToStoryHub()">
+		<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+		Story Map
+	</button>
+	<button class="viz-nav viz-nav-prev" onclick="goToPage(5)">
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M15 6l-6 6 6 6"/></svg>
+		Genre &amp; Language
+	</button>
+	<button class="viz-nav viz-nav-next" onclick="goToPage(7)">
+		Streaming Map
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M9 6l6 6-6 6"/></svg>
+	</button>
+	<div class="page-content viz-page">
+		<h2 class="viz-title">Budget vs Revenue</h2>
+		<p class="viz-subtitle">Did the budget pay off? Arrows show each film's return on investment</p>
+		<div class="viz-explanation">
+			<button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
+				About this visualization
+			</button>
+			<div class="viz-explanation-body"><div class="viz-explanation-body-inner">
+				<p>Placeholder explanation for Budget vs Revenue. Describe how genre and language trends drive return on investment in the film industry.</p>
+			</div></div>
+		</div>
+		<div class="viz-layout">
+			<div class="viz-container arrow-chart-container" id="viz-4">
 				<p class="placeholder-text">Loading visualization...</p>
 			</div>
+			<div class="viz-sidebar" id="rb-sidebar"></div>
 		</div>
-		<button class="nav-arrow prev-arrow" onclick="prevPage()">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-				<path d="M19 12H5M12 19l-7-7 7-7"/>
-			</svg>
-		</button>
-		<button class="nav-arrow next-arrow" onclick="nextPage()">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-				<path d="M5 12h14M12 5l7 7-7 7"/>
-			</svg>
-		</button>
-	</section>
+	</div>
+</section>
 
-	<!-- Visualization Page 7 - Map -->
-	<section class="page" data-page="7">
+<!-- Page 7 — Streaming Map -->
+<section class="overlay-page" data-page="7">
+	<button class="hub-back-btn" onclick="goToStoryHub()">
+		<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+		Story Map
+	</button>
+	<button class="viz-nav viz-nav-prev" onclick="goToPage(6)">
+		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M15 6l-6 6 6 6"/></svg>
+		Budget vs Revenue
+	</button>
 	<div class="page-content viz-page">
 		<h2 class="viz-title">Platform Dominance in Global Streaming Catalogs</h2>
 		<p class="viz-subtitle">Comparing where Netflix, Amazon Prime, and Disney+ source titles worldwide</p>
-
+		<div class="viz-explanation">
+			<button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
+				About this visualization
+			</button>
+			<div class="viz-explanation-body"><div class="viz-explanation-body-inner">
+				<p>Streaming platforms are often described as global, but the origins of the content within their catalogs are not evenly distributed around the world. This visualization reflects how different regions contribute to the libraries of major streaming services such as Netflix, Amazon Prime, and Disney+. By comparing where titles are produced, it highlights patterns in platform dominance and reveals which parts of the world supply the most content. On the globe, each country displays colored markers for the platforms, where larger markers indicate a greater number of titles linked to that country. These patterns suggest that while streaming platforms distribute content globally, the production of that content is still concentrated in a smaller set of influential regions. Together, these trends connect to the broader theme of our project: although streaming has expanded access to international media, the industry continues to be shaped by regional production hubs.</p>
+			</div></div>
+		</div>
 		<div class="viz-layout">
 			<div class="viz-container" id="viz-streaming-map" style="height:auto; min-height:520px;">
 				<p class="placeholder-text">Loading visualization...</p>
 			</div>
+
 			<div class="viz-sidebar">
 				<div>
 					<label for="platformFilter">Platform</label>
@@ -210,6 +293,7 @@
 						<option value="Disney+">Disney+</option>
 					</select>
 				</div>
+
 				<div>
 					<label for="typeFilter">Type</label>
 					<select id="typeFilter">
@@ -218,61 +302,31 @@
 						<option value="Film">Film</option>
 					</select>
 				</div>
+
+				<div>
+					<label for="yearSlider">Release year: <span id="yearLabel">2023</span></label>
+					<input
+						type="range"
+						id="yearSlider"
+						min="2000"
+						max="2023"
+						step="1"
+						value="2023"
+					/>
+				</div>
 			</div>
 		</div>
 	</div>
-
-	<button class="nav-arrow prev-arrow" onclick="prevPage()">
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-			<path d="M19 12H5M12 19l-7-7 7-7"/>
-		</svg>
-	</button>
-	<button class="nav-arrow next-arrow" onclick="nextPage()">
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-			<path d="M5 12h14M12 5l7 7-7 7"/>
-		</svg>
-	</button>
 </section>
-
-	<!-- Visualization Page 8 - Genre–Language Alluvial -->
-	<section class="page" data-page="8">
-		<div class="page-content viz-page">
-			<h2 class="viz-title">Genre &amp; Language Connections</h2>
-			<p class="viz-subtitle">How do film genres relate to their original language? Flow width shows the number of films.</p>
-			<div class="viz-layout">
-				<div class="viz-container" id="viz-genre-lang" style="height:auto; min-height:520px;">
-					<p class="placeholder-text">Loading visualization...</p>
-				</div>
-				<div class="viz-sidebar" id="gl-sidebar"></div>
-			</div>
-		</div>
-
-		<button class="nav-arrow prev-arrow" onclick="prevPage()">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-				<path d="M19 12H5M12 19l-7-7 7-7"/>
-			</svg>
-		</button>
-	</section>
-
-</div>
-
-<!-- Page Indicator -->
-<div class="page-indicator">
-	<span class="current-page">1</span>
-	<span class="page-divider">/</span>
-	<span class="total-pages">8</span>
-</div>
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
 <script src="js/genre_playoffs.js"></script>
-<script src="js/country_playoffs.js"></script>
 <script src="js/trading_card.js"></script>
 <script src="js/revenue_budget.js"></script>
 <script src="js/language_representation.js"></script>
-<script src="js/netflix_seasons.js"></script>
 <script src="js/streaming_map.js"></script>
 <script src="js/genre_language.js"></script>
 <script src="js/main.js"></script>

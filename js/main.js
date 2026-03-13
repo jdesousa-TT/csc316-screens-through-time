@@ -1,155 +1,172 @@
 /**
- * Screens Through Time - Page Navigation & Story Controller
+ * Screens Through Time - Navigation Controller
+ *
+ * Architecture:
+ *   Pages 0-1 (Title + Hub) live in a scroll-snap container.
+ *   Pages 2-7 (visualizations) are fixed overlays toggled on/off.
  */
 
-// Current page state
-let currentPage = 0;
-const pages = document.querySelectorAll('.page');
-const totalPages = pages.length;
+const scrollLanding = document.getElementById('scroll-landing');
+const overlayPages = document.querySelectorAll('.overlay-page');
+let activeOverlay = null;
 
-// Update page indicator
-function updatePageIndicator() {
-    const currentDisplay = document.querySelector('.current-page');
-    const totalDisplay = document.querySelector('.total-pages');
-
-    if (currentDisplay) currentDisplay.textContent = currentPage + 1;
-    if (totalDisplay) totalDisplay.textContent = totalPages;
-}
-
-// Navigate to a specific page
+/* ── Show an overlay viz page ── */
 function goToPage(pageIndex) {
-    if (pageIndex < 0 || pageIndex >= totalPages || pageIndex === currentPage) {
+    if (pageIndex <= 1) {
+        goToStoryHub();
         return;
     }
 
-    const currentPageEl = pages[currentPage];
-    const nextPageEl = pages[pageIndex];
-    const direction = pageIndex > currentPage ? 'right' : 'left';
+    const target = document.querySelector(`.overlay-page[data-page="${pageIndex}"]`);
+    if (!target) return;
 
-    // Remove any existing animation classes
-    pages.forEach(page => {
-        page.classList.remove('slide-out-left', 'slide-in-right', 'slide-out-right', 'slide-in-left');
+    if (activeOverlay && activeOverlay !== target) {
+        activeOverlay.classList.remove('active');
+    }
+
+    target.classList.add('active');
+    activeOverlay = target;
+    initVisualization(pageIndex);
+}
+
+/* ── Return to hub (close any overlay, scroll to hub section) ── */
+function goToStoryHub() {
+    if (activeOverlay) {
+        activeOverlay.classList.remove('active');
+        activeOverlay = null;
+    }
+    const hubSection = document.querySelector('.snap-section[data-page="1"]');
+    if (hubSection) {
+        hubSection.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+/* ── Draw hub connector lines when hub section is visible ── */
+const hubObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting && !hubConnectorsDrawn) {
+            drawHubConnectors();
+            hubConnectorsDrawn = true;
+        }
     });
+}, { threshold: 0.4 });
 
-    // Animate out current page
-    if (direction === 'right') {
-        currentPageEl.classList.add('slide-out-left');
-        nextPageEl.classList.add('slide-in-right');
-    } else {
-        currentPageEl.classList.add('slide-out-right');
-        nextPageEl.classList.add('slide-in-left');
-    }
+let hubConnectorsDrawn = false;
+const hubSection = document.querySelector('.snap-section[data-page="1"]');
+if (hubSection) hubObserver.observe(hubSection);
 
-    // Update active states after animation
-    setTimeout(() => {
-        currentPageEl.classList.remove('active');
-        nextPageEl.classList.add('active');
-        currentPage = pageIndex;
-        updatePageIndicator();
-        initVisualization(currentPage);
-    }, 600);
-}
-
-// Navigate to next page
-function nextPage() {
-    if (currentPage < totalPages - 1) {
-        goToPage(currentPage + 1);
-    }
-}
-
-// Navigate to previous page
-function prevPage() {
-    if (currentPage > 0) {
-        goToPage(currentPage - 1);
-    }
-}
-
-// Keyboard navigation
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight' || e.key === ' ') {
-        e.preventDefault();
-        nextPage();
-    } else if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        prevPage();
-    }
-});
-
-// Track which visualizations have been initialized
+/* ── Visualization init (lazy, once per page) ── */
 const initializedViz = new Set();
 
-// Initialize visualizations for a page
 function initVisualization(pageIndex) {
     if (initializedViz.has(pageIndex)) return;
 
-    switch(pageIndex) {
-        case 1:
-            // Genre playoffs visualization
+    switch (pageIndex) {
+        case 2:
             if (typeof initGenrePlayoffs === 'function') {
                 initGenrePlayoffs();
                 initializedViz.add(pageIndex);
             }
             break;
-        case 2:
-            // Country playoffs visualization
-            if (typeof initCountryPlayoffs === 'function') {
-                initCountryPlayoffs();
-                initializedViz.add(pageIndex);
-            }
-            break;
-        case 3:
-            // Trading cards visualization
-            if (typeof initTradingCards === 'function') {
-                initTradingCards();
-                initializedViz.add(pageIndex);
-            }
-            break;
         case 4:
-            // Revenue vs Budget arrow chart
-            if (typeof initRevenueBudget === 'function') {
-                initRevenueBudget();
-                initializedViz.add(pageIndex);
-            }
-            break;
-        case 5:
-            // Language representation chart
-            d3.csv('data/netflix_titles.csv').then(function(data) {
+            d3.csv('data/netflix_titles.csv').then(function (data) {
                 new LanguageRepresentation('viz-language', data);
                 initializedViz.add(pageIndex);
             });
             break;
-        case 6:
-            // Netflix seasons chart
-            d3.csv('data/netflix_titles.csv').then(function(data) {
-                new NetflixSeasons('viz-seasons', data);
-                initializedViz.add(pageIndex);
-            });
-            break;
-        case 7:
-            // Streaming map (already auto-inits via streaming_map.js)
-            initializedViz.add(pageIndex);
-            break;
-        case 8:
+        case 5:
             if (typeof initGenreLanguage === 'function') {
                 initGenreLanguage();
                 initializedViz.add(pageIndex);
             }
             break;
+        case 6:
+            if (typeof initRevenueBudget === 'function') {
+                initRevenueBudget();
+                initializedViz.add(pageIndex);
+            }
+            break;
+        case 7:
+            initializedViz.add(pageIndex);
+            break;
     }
 }
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    updatePageIndicator();
+/* ── Hub connector lines (SVG drawn from live card positions) ── */
 
-    // Ensure first page is active
-    if (pages.length > 0) {
-        pages[0].classList.add('active');
+function drawHubConnectors() {
+    const arc = document.getElementById('hub-arc');
+    const svg = document.getElementById('hub-connectors');
+    if (!arc || !svg) return;
+
+    const arcRect = arc.getBoundingClientRect();
+    svg.setAttribute('viewBox', `0 0 ${arcRect.width} ${arcRect.height}`);
+    svg.innerHTML = '';
+
+    const ids = ['hook', 'ri1', 'ri2', 'aha', 'res'];
+    const nodes = {};
+    ids.forEach(id => {
+        nodes[id] = arc.querySelector(`[data-hub-id="${id}"]`);
+    });
+
+    function edgeOf(el, side) {
+        const r = el.getBoundingClientRect();
+        return {
+            x: (side === 'right' ? r.right : r.left) - arcRect.left,
+            y: (r.top + r.bottom) / 2 - arcRect.top
+        };
     }
 
-    // Pre-initialize visualizations
-    initVisualization(1);
+    const connections = [
+        { from: edgeOf(nodes.hook, 'right'), to: edgeOf(nodes.ri1, 'left') },
+        { from: edgeOf(nodes.hook, 'right'), to: edgeOf(nodes.ri2, 'left') },
+        { from: edgeOf(nodes.ri1, 'right'),  to: edgeOf(nodes.aha, 'left') },
+        { from: edgeOf(nodes.ri2, 'right'),  to: edgeOf(nodes.aha, 'left') },
+        { from: edgeOf(nodes.aha, 'right'),  to: edgeOf(nodes.res, 'left') },
+    ];
+
+    const NS = 'http://www.w3.org/2000/svg';
+
+    const defs = document.createElementNS(NS, 'defs');
+    const marker = document.createElementNS(NS, 'marker');
+    marker.setAttribute('id', 'hub-arrow');
+    marker.setAttribute('viewBox', '0 0 10 10');
+    marker.setAttribute('refX', '9');
+    marker.setAttribute('refY', '5');
+    marker.setAttribute('markerWidth', '6');
+    marker.setAttribute('markerHeight', '6');
+    marker.setAttribute('orient', 'auto-start-reverse');
+    const mPath = document.createElementNS(NS, 'path');
+    mPath.setAttribute('d', 'M 0 1 L 6 5 L 0 9');
+    mPath.setAttribute('stroke', '#bbb');
+    mPath.setAttribute('stroke-width', '1.5');
+    mPath.setAttribute('fill', 'none');
+    marker.appendChild(mPath);
+    defs.appendChild(marker);
+    svg.appendChild(defs);
+
+    connections.forEach(({ from, to }) => {
+        const mx = (from.x + to.x) / 2;
+        const path = document.createElementNS(NS, 'path');
+        path.setAttribute('d', `M${from.x},${from.y} C${mx},${from.y} ${mx},${to.y} ${to.x},${to.y}`);
+        path.setAttribute('stroke', '#ccc');
+        path.setAttribute('stroke-width', '2');
+        path.setAttribute('fill', 'none');
+        path.setAttribute('marker-end', 'url(#hub-arrow)');
+        svg.appendChild(path);
+    });
+}
+
+let hubResizeTimer;
+window.addEventListener('resize', () => {
+    clearTimeout(hubResizeTimer);
+    hubResizeTimer = setTimeout(() => {
+        if (hubConnectorsDrawn) drawHubConnectors();
+    }, 150);
+});
+
+/* ── Pre-initialize heavy visualizations ── */
+document.addEventListener('DOMContentLoaded', () => {
     initVisualization(2);
-    initVisualization(3);
-    initVisualization(4);
+    initVisualization(6);
 });

@@ -71,32 +71,75 @@ function tryLoadImage(container, slug, formats, index, altText) {
         });
 }
 
-// Initialize the trading cards visualization
+// Genre name mapping: the streaming CSVs use slightly different genre names
+// than the playoffs. This maps common playoff genre names to CSV genre substrings.
+const GENRE_FILTER_MAP = {
+    'Drama': ['Drama', 'Dramas'],
+    'Comedy': ['Comedy', 'Comedies'],
+    'Action': ['Action', 'Action & Adventure'],
+    'Kids & Family': ['Kids', 'Family', 'Children'],
+    'Thriller': ['Thriller', 'Thrillers'],
+    'Documentary': ['Documentary', 'Documentaries', 'Docuseries'],
+    'Animation': ['Animation', 'Anime'],
+    'Horror': ['Horror'],
+};
+
+function genreMatchesFilter(genreName, filterGenre) {
+    const variants = GENRE_FILTER_MAP[filterGenre];
+    if (!variants) return genreName.toLowerCase().includes(filterGenre.toLowerCase());
+    return variants.some(v => genreName.toLowerCase().includes(v.toLowerCase()));
+}
+
 function initTradingCards() {
-    d3.csv('data/disney_plus_titles.csv').then(data => {
-        // Process data to get director statistics
-        const directorStats = processDirectorData(data);
-        
-        // Get top 10 directors
-        const top10Directors = directorStats.slice(0, 10);
-        
-        // Log expected photo filenames for reference
-        console.log('📸 Expected photo filenames (place in photos/directors/):');
-        console.log('   Supported formats: .webp, .jpg, .jpeg, .png');
-        top10Directors.forEach(d => {
-            console.log(`   ${nameToSlug(d.name)}.[webp|jpg|png]  ←  "${d.name}"`);
-        });
-        
-        // Clear placeholder
+    Promise.all([
+        d3.csv('data/netflix_titles.csv'),
+        d3.csv('data/amazon_prime_titles.csv'),
+        d3.csv('data/disney_plus_titles.csv')
+    ]).then(([netflix, amazon, disney]) => {
+        const allData = [...netflix, ...amazon, ...disney];
+        const genreFilter = window.selectedGenreFilter || null;
+
+        const directorStats = processDirectorData(allData);
+
+        let filtered = directorStats;
+        if (genreFilter) {
+            filtered = directorStats.filter(d =>
+                d.topGenres.some(g => genreMatchesFilter(g.genre, genreFilter))
+            );
+        }
+
+        const top10 = filtered.slice(0, 10);
+
+        // Update page title/subtitle
+        const titleEl = document.getElementById('cards-title');
+        const subEl = document.getElementById('cards-subtitle');
+        if (titleEl) titleEl.textContent = genreFilter
+            ? `${genreFilter} Directors`
+            : 'Director Trading Cards';
+        if (subEl) subEl.textContent = genreFilter
+            ? `Top directors with ${genreFilter} titles across Netflix, Amazon Prime & Disney+`
+            : 'Top Directors by Number of Titles across all platforms';
+
         const container = d3.select('#viz-3');
         container.html('');
-        
-        // Create cards container
+
+        if (genreFilter) {
+            container.append('button')
+                .attr('class', 'rb-pill')
+                .style('margin-bottom', '16px')
+                .style('align-self', 'center')
+                .text('← Show All Directors')
+                .on('click', () => {
+                    window.selectedGenreFilter = null;
+                    container.html('');
+                    initTradingCards();
+                });
+        }
+
         const cardsContainer = container.append('div')
             .attr('class', 'trading-cards-container');
-        
-        // Create a card for each director
-        top10Directors.forEach((director, index) => {
+
+        top10.forEach((director, index) => {
             createTradingCard(cardsContainer, director, index);
         });
     }).catch(error => {
@@ -117,7 +160,7 @@ function processDirectorData(data) {
         const genres = row.listed_in ? row.listed_in.split(',').map(g => g.trim()) : [];
         
         directors.forEach(director => {
-            if (!director) return;
+            if (!director || /^\d+$/.test(director)) return;
             
             if (!directorMap.has(director)) {
                 directorMap.set(director, {
