@@ -31,7 +31,6 @@ class LanguageRepresentation {
     initVis() {
         let vis = this;
 
-        // Tooltip
         vis.tooltip = d3.select('body').append('div')
             .attr('class', 'waffle-tooltip')
             .style('opacity', 0);
@@ -39,7 +38,6 @@ class LanguageRepresentation {
         vis.wrangleData();
     }
 
-    // Map country name to a language group
     getLanguageGroup(country) {
         if (!country) return 'Other';
         let c = country.split(',')[0].trim();
@@ -63,7 +61,6 @@ class LanguageRepresentation {
     wrangleData() {
         let vis = this;
 
-        // Build raw counts per decade per language
         let raw = {};
         vis.decades.forEach(function(d) {
             raw[d] = {};
@@ -79,7 +76,6 @@ class LanguageRepresentation {
             raw[decade][lang] = (raw[decade][lang] || 0) + 1;
         });
 
-        // Build display data: 80 cells per decade (8 cols x 10 rows)
         vis.displayData = vis.decades.map(function(decade) {
             let counts = raw[decade];
             let total  = d3.sum(vis.langOrder, function(l) { return counts[l]; });
@@ -90,7 +86,6 @@ class LanguageRepresentation {
                 for (let i = 0; i < n; i++) { cells.push(lang); }
             });
 
-            // Pad or trim to exactly 80
             while (cells.length < 80) { cells.push('Other'); }
             cells.length = 80;
 
@@ -108,7 +103,6 @@ class LanguageRepresentation {
 
         let wrapper = container.append('div').attr('class', 'waffle-wrapper');
 
-        // --- Legend ---
         let legend = wrapper.append('div').attr('class', 'waffle-legend');
 
         vis.langOrder.forEach(function(lang) {
@@ -119,7 +113,6 @@ class LanguageRepresentation {
             item.append('span').text(lang);
         });
 
-        // --- Decade columns ---
         let grid = wrapper.append('div').attr('class', 'waffle-grid');
 
         vis.displayData.forEach(function(d, di) {
@@ -131,7 +124,6 @@ class LanguageRepresentation {
 
             let squares = col.append('div').attr('class', 'waffle-squares');
 
-            // Draw each cell
             d.cells.forEach(function(lang, i) {
                 squares.append('div')
                     .attr('class', 'waffle-cell')

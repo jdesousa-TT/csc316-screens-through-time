@@ -266,6 +266,13 @@ body {
 	margin: 0;
 }
 
+.conclusion-divider {
+	width: 48px;
+	height: 1px;
+	background: var(--color-accent);
+	margin: 0 auto;
+}
+
 /* ========================================
    Story Hub (Page 1)
    ======================================== */
