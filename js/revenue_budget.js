@@ -14,8 +14,10 @@ function rbInjectStyles() {
       position: relative;
       display: flex;
       flex-direction: column;
+      align-items: stretch;
       padding: 24px 24px 16px !important;
       box-sizing: border-box;
+      overflow: visible;
     }
 
     /* ── Top controls row ── */
@@ -517,16 +519,25 @@ function rbDraw(allFilms) {
     });
 
     // Film name labels (in separate group so they're always on top)
-    xLabelsG.selectAll('text')
+    xLabelsG.selectAll('.rb-film-label')
       .data(data).enter().append('text')
+      .attr('class', 'rb-film-label')
       .attr('x', d => xScale(d.title))
-      .attr('y', H + 14)
+      .attr('y', H + 16)
       .attr('text-anchor','end')
-      .attr('transform', d => `rotate(-42, ${xScale(d.title)}, ${H + 14})`)
-      .style('font-size','10px').style('fill','#999').style('font-family','inherit')
+      .attr('transform', d => `rotate(-42, ${xScale(d.title)}, ${H + 16})`)
+      .style('font-size','11.5px').style('fill','#666').style('font-family','inherit')
       .attr('opacity', 0)
       .text(d => d.title.length > 22 ? d.title.slice(0, 21) + '…' : d.title)
       .transition().duration(400).delay((_, i) => 800 + i*25).attr('opacity', 1);
+
+    // X-axis title
+    xLabelsG.append('text')
+      .attr('x', W / 2)
+      .attr('y', H + margin.bottom - 10)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '10px').style('letter-spacing', '0.1em').style('fill', '#aaa')
+      .text('FILMS (sorted by budget, low → high)');
 
     // Hit areas
     groups.append('rect')
