@@ -56,7 +56,11 @@ function glInjectStyles() {
       align-items: stretch;
       padding: 24px 24px 16px !important;
       box-sizing: border-box;
-      overflow: visible;
+      overflow: hidden;
+    }
+    #viz-genre-lang svg {
+      display: block;
+      max-width: 100%;
     }
     #gl-controls {
       display: flex;
@@ -232,7 +236,11 @@ function glDraw(pairs) {
   const H = fullH - margin.top - margin.bottom;
 
   const svg = container.append('svg')
-    .attr('width', fullW).attr('height', fullH);
+    .attr('viewBox', `0 0 ${fullW} ${fullH}`)
+    .attr('preserveAspectRatio', 'xMidYMid meet')
+    .style('width', '100%')
+    .style('height', 'auto')
+    .style('max-height', '80vh');
 
   const g = svg.append('g')
     .attr('transform', `translate(${margin.left},${margin.top})`);

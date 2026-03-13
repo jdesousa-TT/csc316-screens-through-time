@@ -1,37 +1,40 @@
 /**
  * Screens Through Time - Page Navigation & Story Controller
+ *
+ * Page order (storyboard):
+ *   0  Title
+ *   1  Genre Playoffs          (Hook)
+ *   2  Director Trading Cards  (Hook pt 2 — filtered from playoffs)
+ *   3  Language Representation  (Rising Insight 1)
+ *   4  Genre–Language Alluvial  (Rising Insight 2)
+ *   5  Revenue vs Budget        (Main Message)
+ *   6  Streaming Map            (Resolution)
+ *   7  Country Playoffs         (Appendix)
+ *   8  Netflix Seasons          (Appendix)
  */
 
-// Current page state
 let currentPage = 0;
 const pages = document.querySelectorAll('.page');
 const totalPages = pages.length;
 
-// Update page indicator
 function updatePageIndicator() {
     const currentDisplay = document.querySelector('.current-page');
     const totalDisplay = document.querySelector('.total-pages');
-
     if (currentDisplay) currentDisplay.textContent = currentPage + 1;
     if (totalDisplay) totalDisplay.textContent = totalPages;
 }
 
-// Navigate to a specific page
 function goToPage(pageIndex) {
-    if (pageIndex < 0 || pageIndex >= totalPages || pageIndex === currentPage) {
-        return;
-    }
+    if (pageIndex < 0 || pageIndex >= totalPages || pageIndex === currentPage) return;
 
     const currentPageEl = pages[currentPage];
     const nextPageEl = pages[pageIndex];
     const direction = pageIndex > currentPage ? 'right' : 'left';
 
-    // Remove any existing animation classes
     pages.forEach(page => {
         page.classList.remove('slide-out-left', 'slide-in-right', 'slide-out-right', 'slide-in-left');
     });
 
-    // Animate out current page
     if (direction === 'right') {
         currentPageEl.classList.add('slide-out-left');
         nextPageEl.classList.add('slide-in-right');
@@ -40,7 +43,6 @@ function goToPage(pageIndex) {
         nextPageEl.classList.add('slide-in-left');
     }
 
-    // Update active states after animation
     setTimeout(() => {
         currentPageEl.classList.remove('active');
         nextPageEl.classList.add('active');
@@ -50,106 +52,88 @@ function goToPage(pageIndex) {
     }, 600);
 }
 
-// Navigate to next page
 function nextPage() {
-    if (currentPage < totalPages - 1) {
-        goToPage(currentPage + 1);
-    }
+    if (currentPage < totalPages - 1) goToPage(currentPage + 1);
 }
 
-// Navigate to previous page
 function prevPage() {
-    if (currentPage > 0) {
-        goToPage(currentPage - 1);
-    }
+    if (currentPage > 0) goToPage(currentPage - 1);
 }
 
-// Keyboard navigation
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight' || e.key === ' ') {
-        e.preventDefault();
-        nextPage();
-    } else if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        prevPage();
-    }
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextPage(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); prevPage(); }
 });
 
-// Track which visualizations have been initialized
 const initializedViz = new Set();
 
-// Initialize visualizations for a page
 function initVisualization(pageIndex) {
     if (initializedViz.has(pageIndex)) return;
 
-    switch(pageIndex) {
+    switch (pageIndex) {
         case 1:
-            // Genre playoffs visualization
             if (typeof initGenrePlayoffs === 'function') {
                 initGenrePlayoffs();
                 initializedViz.add(pageIndex);
             }
             break;
         case 2:
-            // Country playoffs visualization
-            if (typeof initCountryPlayoffs === 'function') {
-                initCountryPlayoffs();
-                initializedViz.add(pageIndex);
-            }
-            break;
-        case 3:
-            // Trading cards visualization
             if (typeof initTradingCards === 'function') {
                 initTradingCards();
                 initializedViz.add(pageIndex);
             }
             break;
-        case 4:
-            // Revenue vs Budget arrow chart
-            if (typeof initRevenueBudget === 'function') {
-                initRevenueBudget();
-                initializedViz.add(pageIndex);
-            }
-            break;
-        case 5:
-            // Language representation chart
-            d3.csv('data/netflix_titles.csv').then(function(data) {
+        case 3:
+            d3.csv('data/netflix_titles.csv').then(function (data) {
                 new LanguageRepresentation('viz-language', data);
                 initializedViz.add(pageIndex);
             });
             break;
-        case 6:
-            // Netflix seasons chart
-            d3.csv('data/netflix_titles.csv').then(function(data) {
-                new NetflixSeasons('viz-seasons', data);
-                initializedViz.add(pageIndex);
-            });
-            break;
-        case 7:
-            // Streaming map (already auto-inits via streaming_map.js)
-            initializedViz.add(pageIndex);
-            break;
-        case 8:
+        case 4:
             if (typeof initGenreLanguage === 'function') {
                 initGenreLanguage();
                 initializedViz.add(pageIndex);
             }
             break;
+        case 5:
+            if (typeof initRevenueBudget === 'function') {
+                initRevenueBudget();
+                initializedViz.add(pageIndex);
+            }
+            break;
+        case 6:
+            initializedViz.add(pageIndex);
+            break;
+        case 7:
+            if (typeof initCountryPlayoffs === 'function') {
+                initCountryPlayoffs();
+                initializedViz.add(pageIndex);
+            }
+            break;
+        case 8:
+            d3.csv('data/netflix_titles.csv').then(function (data) {
+                new NetflixSeasons('viz-seasons', data);
+                initializedViz.add(pageIndex);
+            });
+            break;
     }
 }
 
-// Initialize
+/**
+ * Navigate to Director Cards page with an optional genre filter.
+ * Called from genre_playoffs.js when the champion is clicked.
+ */
+function goToFilteredCards(genre) {
+    window.selectedGenreFilter = genre || null;
+    initializedViz.delete(2);
+    goToPage(2);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     updatePageIndicator();
+    if (pages.length > 0) pages[0].classList.add('active');
 
-    // Ensure first page is active
-    if (pages.length > 0) {
-        pages[0].classList.add('active');
-    }
-
-    // Pre-initialize visualizations
     initVisualization(1);
     initVisualization(2);
-    initVisualization(3);
-    initVisualization(4);
+    initVisualization(5);
 });

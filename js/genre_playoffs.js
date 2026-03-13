@@ -338,6 +338,25 @@ function ensurePlayoffRuntimeStyles() {
             color: rgba(255, 255, 255, 0.78);
         }
 
+        .genre-playoffs-callout-btn {
+            margin-top: 0.6rem;
+            padding: 0.45rem 1.1rem;
+            border: 1.5px solid rgba(255,255,255,0.35);
+            border-radius: 100px;
+            background: transparent;
+            color: white;
+            font-family: var(--font-body);
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .genre-playoffs-callout-btn:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.6);
+        }
+
         .genre-playoff-tooltip {
             position: absolute;
             max-width: 260px;
@@ -486,6 +505,37 @@ const genrePlayoffStructure = {
     ]
 };
 
+// Language labels for ISO codes
+const LANG_LABELS = {
+    en:'English', fr:'French', es:'Spanish', ja:'Japanese', ko:'Korean',
+    de:'German', hi:'Hindi', zh:'Chinese', it:'Italian', ru:'Russian',
+    pt:'Portuguese', cn:'Chinese', ta:'Tamil', te:'Telugu', tr:'Turkish',
+    sv:'Swedish', da:'Danish', nl:'Dutch', th:'Thai', ar:'Arabic',
+};
+function langLabel(code) { return LANG_LABELS[code] || code.toUpperCase(); }
+
+function parseMetadataGenres(raw) {
+    if (!raw || raw.length < 3) return [];
+    try {
+        return JSON.parse(raw.replace(/'/g, '"')).map(g => g.name).filter(Boolean);
+    } catch { return []; }
+}
+
+function buildLanguagesByGenre(metadataRows) {
+    const map = new Map();
+    metadataRows.forEach(row => {
+        const lang = (row.original_language || '').trim();
+        if (!lang) return;
+        const genres = parseMetadataGenres(row.genres);
+        genres.forEach(g => {
+            if (!map.has(g)) map.set(g, new Map());
+            const lm = map.get(g);
+            lm.set(lang, (lm.get(lang) || 0) + 1);
+        });
+    });
+    return map;
+}
+
 function initGenrePlayoffs() {
     const container = d3.select('#viz-1');
 
@@ -495,9 +545,11 @@ function initGenrePlayoffs() {
     Promise.all([
         d3.csv('data/netflix_titles.csv'),
         d3.csv('data/disney_plus_titles.csv'),
-        d3.csv('data/amazon_prime_titles.csv')
-    ]).then(([netflixTitles, disneyTitles, amazonTitles]) => {
-        const stats = buildGenrePlayoffData([...netflixTitles, ...disneyTitles, ...amazonTitles]);
+        d3.csv('data/amazon_prime_titles.csv'),
+        d3.csv('data/movies/movies_metadata.csv')
+    ]).then(([netflixTitles, disneyTitles, amazonTitles, metadata]) => {
+        const langByGenre = buildLanguagesByGenre(metadata);
+        const stats = buildGenrePlayoffData([...netflixTitles, ...disneyTitles, ...amazonTitles], langByGenre);
         renderGenrePlayoffs(container, stats);
     }).catch(error => {
         console.error('Error loading genre playoff data:', error);
@@ -505,7 +557,7 @@ function initGenrePlayoffs() {
     });
 }
 
-function buildGenrePlayoffData(rows) {
+function buildGenrePlayoffData(rows, langByGenre) {
     const counts = new Map();
     const countriesByGenre = new Map();
 
@@ -542,7 +594,14 @@ function buildGenrePlayoffData(rows) {
     ];
 
     const seededGenres = selectedGenres
-        .map(genre => createGenreSummary(genre, counts.get(genre) || 0, countriesByGenre.get(genre) || new Map()))
+        .map(genre => {
+            const summary = createGenreSummary(genre, counts.get(genre) || 0, countriesByGenre.get(genre) || new Map());
+            const lm = langByGenre ? langByGenre.get(genre) : null;
+            summary.topLanguages = lm
+                ? [...lm.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([code, n]) => ({ code, label: langLabel(code), count: n }))
+                : [];
+            return summary;
+        })
         .sort((a, b) => b.count - a.count)
         .map((genre, index) => ({
             ...genre,
@@ -911,6 +970,23 @@ function renderGenrePlayoffs(container, stats) {
         callout.append('p')
             .attr('class', 'genre-playoffs-callout-copy')
             .text(`${d3.format(',')(champion.count)} titles across ${champion.countrySpread} countries`);
+
+        if (champion.topLanguages && champion.topLanguages.length) {
+            callout.append('p')
+                .attr('class', 'genre-playoffs-callout-copy')
+                .style('margin-top', '4px')
+                .style('font-size', '0.7rem')
+                .html('Top languages: ' + champion.topLanguages.map(l => `<strong>${l.label}</strong>`).join(', '));
+        }
+
+        callout.append('button')
+            .attr('class', 'genre-playoffs-callout-btn')
+            .text(`See ${champion.genre} Directors →`)
+            .on('click', () => {
+                if (typeof goToFilteredCards === 'function') {
+                    goToFilteredCards(champion.genre);
+                }
+            });
     }
 
     function renderGenreCard(parent, genre, className, removable, showCount) {
@@ -1157,9 +1233,17 @@ function buildTooltipHtml(genre) {
             .join('')
         : '<span class="genre-tooltip-pill">No country metadata</span>';
 
+    const languages = (genre.topLanguages && genre.topLanguages.length)
+        ? '<div style="margin-top:6px;font-size:0.68rem;color:#aaa;letter-spacing:0.06em;text-transform:uppercase;">Top Languages</div>'
+          + genre.topLanguages
+              .map(l => `<span class="genre-tooltip-pill">${l.label} (${d3.format(',')(l.count)})</span>`)
+              .join('')
+        : '';
+
     return `
         <div class="genre-tooltip-title">${genre.genre} (#${genre.seed})</div>
         <div class="genre-tooltip-countries">${countries}</div>
+        ${languages}
     `;
 }
 
