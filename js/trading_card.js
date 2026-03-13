@@ -160,7 +160,7 @@ function processDirectorData(data) {
         const genres = row.listed_in ? row.listed_in.split(',').map(g => g.trim()) : [];
         
         directors.forEach(director => {
-            if (!director) return;
+            if (!director || /^\d+$/.test(director)) return;
             
             if (!directorMap.has(director)) {
                 directorMap.set(director, {

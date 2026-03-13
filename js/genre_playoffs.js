@@ -525,12 +525,15 @@ function ensurePlayoffRuntimeStyles() {
 
         .genre-playoffs-click-tip {
             text-align: center;
-            font-size: 0.8rem;
-            color: var(--color-text-muted);
-            margin: 0.6rem 0 0;
-            letter-spacing: 0.03em;
-            opacity: 0;
-            animation: playoffReveal 0.5s ease 0.3s forwards;
+            font-size: 0.92rem;
+            color: var(--color-text);
+            margin: 0.7rem 0 0;
+            letter-spacing: 0.02em;
+            padding: 0.55rem 1.2rem;
+            background: rgba(26,26,26,0.05);
+            border: 1px solid rgba(26,26,26,0.1);
+            border-radius: 100px;
+            align-self: center;
         }
 
         @media (max-width: 768px) {
@@ -656,6 +659,7 @@ function buildDirectorsByGenre(rows) {
         const normGenres = getNormalizedGenres(row.listed_in);
 
         directors.forEach(dir => {
+            if (/^\d+$/.test(dir)) return;
             if (!dirMap.has(dir)) dirMap.set(dir, { name: dir, totalTitles: 0, rawGenres: new Map(), normGenres: new Map() });
             const d = dirMap.get(dir);
             d.totalTitles++;
@@ -1027,11 +1031,10 @@ function renderGenrePlayoffs(container, stats, dirsByGenre) {
         syncControls();
         requestAnimationFrame(drawConnectors);
 
-        shell.selectAll('.genre-playoffs-click-tip').remove();
-        if (state.winners.champion) {
+        if (!shell.select('.genre-playoffs-click-tip').node()) {
             shell.append('p')
                 .attr('class', 'genre-playoffs-click-tip')
-                .text('Click any genre to see their top directors');
+                .text('💡 Click any genre to see their top directors');
         }
     }
 
