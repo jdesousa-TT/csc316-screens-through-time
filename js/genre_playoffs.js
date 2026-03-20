@@ -96,10 +96,16 @@ function ensurePlayoffRuntimeStyles() {
             box-shadow: 0 5px 14px rgba(26, 26, 26, 0.08);
             text-align: left;
             cursor: grab;
+            transition: opacity 0.22s ease, transform 0.32s ease;
         }
 
         .genre-pool-card:active {
             cursor: grabbing;
+        }
+
+        .genre-pool-card.is-flying-out {
+            opacity: 0;
+            transform: scale(0.94);
         }
 
         .genre-playoffs-heading {
@@ -113,12 +119,19 @@ function ensurePlayoffRuntimeStyles() {
         .genre-playoffs-copy {
             margin: 0;
             color: var(--color-text-muted);
-            font-size: 0.9rem;
+            font-size: 1rem;
+        }
+
+        .genre-playoffs-step {
+            margin: 0;
+            font-size: 0.94rem;
+            color: var(--color-text);
+            line-height: 1.45;
         }
 
         .genre-playoffs-footnote {
             margin: 0;
-            font-size: 0.82rem;
+            font-size: 0.92rem;
             color: var(--color-text-muted);
         }
 
@@ -384,6 +397,18 @@ function ensurePlayoffRuntimeStyles() {
             margin-top: 0.45rem;
         }
 
+        .genre-tooltip-block {
+            margin-top: 0.45rem;
+        }
+
+        .genre-tooltip-label {
+            font-size: 0.68rem;
+            color: #aaa;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+
         .genre-tooltip-pill {
             padding: 0.25rem 0.5rem;
             border-radius: 999px;
@@ -406,12 +431,22 @@ function ensurePlayoffRuntimeStyles() {
             color: var(--color-text);
             pointer-events: none;
             z-index: 1200;
-            transform: translate(0, 0);
-            transition: transform 0.44s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+            overflow: hidden;
+            transform: translateZ(0);
+            transform-origin: top left;
+            will-change: left, top, width, height, opacity, box-shadow;
+            transition:
+                left 0.46s cubic-bezier(0.22, 1, 0.36, 1),
+                top 0.46s cubic-bezier(0.22, 1, 0.36, 1),
+                width 0.46s cubic-bezier(0.22, 1, 0.36, 1),
+                height 0.46s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.46s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.2s ease;
         }
 
         .genre-fly-card.is-moving {
             opacity: 0.9;
+            box-shadow: 0 18px 32px rgba(0, 0, 0, 0.16);
         }
 
         .genre-fly-name {
@@ -525,9 +560,9 @@ function ensurePlayoffRuntimeStyles() {
 
         .genre-playoffs-click-tip {
             text-align: center;
-            font-size: 0.92rem;
+            font-size: 1rem;
             color: var(--color-text);
-            margin: 0.7rem 0 0;
+            margin: 0.7rem 0 1rem;
             letter-spacing: 0.02em;
             padding: 0.55rem 1.2rem;
             background: rgba(26,26,26,0.05);
@@ -878,16 +913,12 @@ function renderGenrePlayoffs(container, stats, dirsByGenre) {
     const randomizeButton = actions.append('button')
         .attr('type', 'button')
         .attr('class', 'genre-playoffs-button secondary')
-        .text('Randomize Bracket');
+        .text('Randomize Brackets');
 
     const resetButton = actions.append('button')
         .attr('type', 'button')
         .attr('class', 'genre-playoffs-button secondary')
         .text('Reset');
-
-    actions.append('p')
-        .attr('class', 'genre-playoffs-footnote')
-        .text('Hover for stats · Drag to fill bracket');
 
     const pool = shell.append('div')
         .attr('class', 'genre-pool');
@@ -906,11 +937,11 @@ function renderGenrePlayoffs(container, stats, dirsByGenre) {
         .style('opacity', 0);
 
     const columns = [
-        { key: 'left-quarter', label: 'Quarterfinals', slots: genrePlayoffStructure.quarterfinals.filter(slot => slot.side === 'left') },
-        { key: 'left-semi', label: 'Semifinals', slots: genrePlayoffStructure.semifinals.filter(slot => slot.side === 'left') },
-        { key: 'center-final', label: 'Final', slots: genrePlayoffStructure.finals },
-        { key: 'right-semi', label: 'Semifinals', slots: genrePlayoffStructure.semifinals.filter(slot => slot.side === 'right') },
-        { key: 'right-quarter', label: 'Quarterfinals', slots: genrePlayoffStructure.quarterfinals.filter(slot => slot.side === 'right') }
+        { key: 'left-quarter', label: 'Quarterfinal Matchups', slots: genrePlayoffStructure.quarterfinals.filter(slot => slot.side === 'left') },
+        { key: 'left-semi', label: 'Semifinal Winners', slots: genrePlayoffStructure.semifinals.filter(slot => slot.side === 'left') },
+        { key: 'center-final', label: 'Championship', slots: genrePlayoffStructure.finals },
+        { key: 'right-semi', label: 'Semifinal Winners', slots: genrePlayoffStructure.semifinals.filter(slot => slot.side === 'right') },
+        { key: 'right-quarter', label: 'Quarterfinal Matchups', slots: genrePlayoffStructure.quarterfinals.filter(slot => slot.side === 'right') }
     ];
 
     const columnSelection = board.selectAll('.genre-playoffs-column')
@@ -974,6 +1005,11 @@ function renderGenrePlayoffs(container, stats, dirsByGenre) {
     });
 
     function renderPool() {
+        const previousPositions = new Map();
+        pool.selectAll('.genre-pool-card').each(function() {
+            previousPositions.set(this.dataset.genre, this.getBoundingClientRect());
+        });
+
         const assignedGenres = new Set(state.assignments.values());
         const available = stats.genres.filter(genre => !assignedGenres.has(genre.genre));
 
@@ -1019,6 +1055,8 @@ function renderGenrePlayoffs(container, stats, dirsByGenre) {
         merged.append('span')
             .attr('class', 'genre-playoff-meta')
             .text(d => `${d.countrySpread} countries`);
+
+        requestAnimationFrame(() => animatePoolReflow(previousPositions));
     }
 
     function renderBoard() {
@@ -1034,7 +1072,7 @@ function renderGenrePlayoffs(container, stats, dirsByGenre) {
         if (!shell.select('.genre-playoffs-click-tip').node()) {
             shell.append('p')
                 .attr('class', 'genre-playoffs-click-tip')
-                .text('💡 Click any genre to see their top directors');
+                .text('Click any genre card at any stage to view its top directors.');
         }
     }
 
@@ -1081,7 +1119,7 @@ function renderGenrePlayoffs(container, stats, dirsByGenre) {
                 if (!genreName) {
                     slotNode.append('div')
                         .attr('class', 'genre-slot-placeholder')
-                        .text(`Drop genre ${slot.id.replace('qf-', '')}`);
+                        .text(getQuarterfinalPlaceholder(slot.id));
                     return;
                 }
 
@@ -1114,7 +1152,7 @@ function renderGenrePlayoffs(container, stats, dirsByGenre) {
             if (!winnerName) {
                 slotNode.append('div')
                     .attr('class', 'genre-slot-placeholder winner')
-                    .text(columnKey === 'center-final' ? 'Winner reveals here' : 'Winner reveals next');
+                    .text(columnKey === 'center-final' ? 'Championship finalist appears here' : 'Winning genre advances here');
                 return;
             }
 
@@ -1370,12 +1408,19 @@ function renderGenrePlayoffs(container, stats, dirsByGenre) {
 
             await new Promise(resolve => {
                 requestAnimationFrame(() => {
-                    ghost.classList.add('is-moving');
-                    ghost.style.transform = `translate(${targetRect.left - sourceRect.left}px, ${targetRect.top - sourceRect.top}px) scale(0.96)`;
+                    requestAnimationFrame(() => {
+                        source.classList.add('is-flying-out');
+                        ghost.classList.add('is-moving');
+                        ghost.style.left = `${targetRect.left}px`;
+                        ghost.style.top = `${targetRect.top}px`;
+                        ghost.style.width = `${targetRect.width}px`;
+                        ghost.style.height = `${targetRect.height}px`;
+                    });
                 });
 
                 window.setTimeout(() => {
                     ghost.remove();
+                    source.classList.remove('is-flying-out');
                     state.assignments.set(slotId, genreName);
                     renderBoard();
                     resolve();
@@ -1384,6 +1429,28 @@ function renderGenrePlayoffs(container, stats, dirsByGenre) {
 
             await delay(110);
         }
+    }
+
+    function animatePoolReflow(previousPositions) {
+        pool.selectAll('.genre-pool-card').each(function() {
+            const currentRect = this.getBoundingClientRect();
+            const previousRect = previousPositions.get(this.dataset.genre);
+
+            if (!previousRect) return;
+
+            const deltaX = previousRect.left - currentRect.left;
+            const deltaY = previousRect.top - currentRect.top;
+
+            if (!deltaX && !deltaY) return;
+
+            this.style.transition = 'none';
+            this.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+
+            requestAnimationFrame(() => {
+                this.style.transition = '';
+                this.style.transform = '';
+            });
+        });
     }
 
     renderBoard();
@@ -1401,24 +1468,61 @@ function resetWinners(state) {
 }
 
 function buildTooltipHtml(genre) {
-    const countries = genre.topCountries.length
-        ? genre.topCountries
-            .map(country => `<span class="genre-tooltip-pill">${country.country} (${d3.format(',')(country.titles)})</span>`)
-            .join('')
-        : '<span class="genre-tooltip-pill">No country metadata</span>';
+    const topCountry = genre.topCountries.length
+        ? genre.topCountries[0]
+        : null;
 
-    const languages = (genre.topLanguages && genre.topLanguages.length)
-        ? '<div style="margin-top:6px;font-size:0.68rem;color:#aaa;letter-spacing:0.06em;text-transform:uppercase;">Top Languages</div>'
-          + genre.topLanguages
-              .map(l => `<span class="genre-tooltip-pill">${l.label} (${d3.format(',')(l.count)})</span>`)
-              .join('')
-        : '';
+    const topLanguage = (genre.topLanguages && genre.topLanguages.length)
+        ? genre.topLanguages[0]
+        : null;
+
+    const countries = topCountry
+        ? `
+            <div class="genre-tooltip-block">
+                <div class="genre-tooltip-label">Top Country</div>
+                <div class="genre-tooltip-countries">
+                    <span class="genre-tooltip-pill">${topCountry.country} (${d3.format(',')(topCountry.titles)})</span>
+                </div>
+            </div>
+        `
+        : `
+            <div class="genre-tooltip-block">
+                <div class="genre-tooltip-label">Top Country</div>
+                <div class="genre-tooltip-countries">
+                    <span class="genre-tooltip-pill">No country metadata</span>
+                </div>
+            </div>
+        `;
+
+    const languages = topLanguage
+        ? `
+            <div class="genre-tooltip-block">
+                <div class="genre-tooltip-label">Top Language</div>
+                <div class="genre-tooltip-countries">
+                    <span class="genre-tooltip-pill">${topLanguage.label} (${d3.format(',')(topLanguage.count)})</span>
+                </div>
+            </div>
+        `
+        : `
+            <div class="genre-tooltip-block">
+                <div class="genre-tooltip-label">Top Language</div>
+                <div class="genre-tooltip-countries">
+                    <span class="genre-tooltip-pill">No language metadata</span>
+                </div>
+            </div>
+        `;
 
     return `
         <div class="genre-tooltip-title">${genre.genre} (#${genre.seed})</div>
-        <div class="genre-tooltip-countries">${countries}</div>
+        <div style="font-size:0.74rem;color:rgba(255,255,255,0.78);margin-bottom:0.3rem;">${d3.format(',')(genre.count)} titles across ${genre.countrySpread} countries</div>
+        ${countries}
         ${languages}
     `;
+}
+
+function getQuarterfinalPlaceholder(slotId) {
+    const matchupNumber = Math.ceil(Number(slotId.replace('qf-', '')) / 2);
+    return `Drop a genre into Matchup ${matchupNumber}`;
 }
 
 function delay(ms) {
