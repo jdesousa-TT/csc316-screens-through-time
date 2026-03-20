@@ -41,6 +41,16 @@ function goToStoryHub() {
     }
 }
 
+function scrollToLandingSection(pageId) {
+    const targetSection = document.querySelector(`.snap-section[data-page="${pageId}"]`);
+    if (!targetSection || !scrollLanding) return;
+
+    scrollLanding.scrollTo({
+        top: targetSection.offsetTop,
+        behavior: 'smooth'
+    });
+}
+
 /* ── Draw hub connector lines when hub section is visible ── */
 const hubObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
