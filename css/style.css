@@ -1287,79 +1287,247 @@ body {
 Map 
 ============================================*/
 .streaming-map-wrapper {
-	position: relative;
-	width: 100%;
-	height: 75vh;
-	min-height: 520px;
+  position: relative;
+  width: 100%;
+  min-height: 520px;
+  border-radius: 24px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.08), transparent 28%),
+    radial-gradient(circle at 80% 10%, rgba(120,180,255,0.10), transparent 24%),
+    linear-gradient(180deg, #071521 0%, #0b1d2c 45%, #06111a 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 18px 50px rgba(0,0,0,0.35);
 }
 
 .streaming-map-svg {
-	width: 100%;
-	height: 100%;
-	display: block;
-}
-
-.streaming-map-tooltip {
-	position: absolute;
-	min-width: 220px;
-	max-width: 320px;
-	pointer-events: none;
-	background: rgba(24, 24, 24, 0.95);
-	color: white;
-	padding: 12px 14px;
-	border-radius: 10px;
-	font-size: 14px;
-	line-height: 1.45;
-	box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-	z-index: 10;
-}
-
-.streaming-map-tooltip.hidden {
-	display: none;
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 .sphere {
-	fill: #dbe7f3;
-	stroke: rgba(70, 70, 70, 0.18);
-	stroke-width: 1px;
+  opacity: 1;
 }
 
 .graticule {
-	fill: none;
-	stroke: rgba(100, 100, 100, 0.12);
-	stroke-width: 0.7px;
+  fill: none;
+  stroke: rgba(210, 235, 255, 0.22);
+  stroke-width: 0.8;
 }
 
 .country {
-	fill: #fafafa;
-	stroke: #111;
-	stroke-width: 1.15px;
+  fill: #9cc7ac;
+  stroke: rgba(13, 31, 24, 0.65);
+  stroke-width: 0.7;
+  transition: fill 180ms ease, opacity 180ms ease;
 }
 
 .country.backface {
-	display: none;
+  fill: #476558;
+  opacity: 0.42;
 }
 
-.pin {
-	opacity: 0.9;
-	cursor: pointer;
-	transition: opacity 0.15s ease, r 0.15s ease;
+.globe-highlight {
+  fill: rgba(255,255,255,0.12);
+  pointer-events: none;
 }
 
-.pin:hover,
-.pin.highlighted {
-	opacity: 1;
-	filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.22));
+.globe-shadow {
+  fill: rgba(0,0,0,0.18);
+  pointer-events: none;
+}
+
+.pin-marker {
+  opacity: 0.95;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.pin-marker.dimmed {
+  opacity: 0.18;
+}
+
+.pin-marker.active {
+  opacity: 1;
+}
+
+.pin-stem {
+  stroke: rgba(255,255,255,0.45);
+  stroke-width: 1.2;
+  pointer-events: none;
+}
+
+.pin-halo {
+  fill: rgba(255,255,255,0.12);
+  filter: url(#pinGlow);
+  animation: pinPulse 2.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.pin-core {
+  stroke: rgba(10,10,10,0.9);
+  stroke-width: 1.6;
+  filter: url(#pinGlow);
+}
+
+.pin-inner {
+  fill: rgba(255,255,255,0.85);
+  pointer-events: none;
+}
+
+@keyframes pinPulse {
+  0% { transform: scale(0.92); opacity: 0.45; }
+  50% { transform: scale(1.08); opacity: 0.16; }
+  100% { transform: scale(0.92); opacity: 0.45; }
 }
 
 .hint {
-	font-size: 13px;
-	fill: #555;
-	text-anchor: middle;
+  fill: rgba(255,255,255,0.8);
+  font-size: 15px;
+  font-weight: 500;
+  text-anchor: middle;
+  letter-spacing: 0.2px;
 }
 
 .platform-label {
-	font-size: 12px;
-	font-weight: 700;
-	fill: #222;
+  fill: rgba(255,255,255,0.9);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.streaming-map-tooltip {
+  position: absolute;
+  z-index: 20;
+  width: 270px;
+  pointer-events: none;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.streaming-map-tooltip.hidden {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.tooltip-card {
+  background: rgba(9, 16, 24, 0.92);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 18px;
+  padding: 14px 14px 12px 14px;
+  color: #f4f7fb;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+}
+
+.tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.tooltip-country {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.tooltip-subtitle {
+  margin-top: 3px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.62);
+}
+
+.tooltip-chip {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.08);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tooltip-mainstat {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.05);
+}
+
+.tooltip-main-label {
+  font-size: 12px;
+  color: rgba(255,255,255,0.62);
+  margin-bottom: 2px;
+}
+
+.tooltip-main-value {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.tooltip-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tooltip-bar-row {
+  display: grid;
+  grid-template-columns: 84px 1fr 34px;
+  gap: 8px;
+  align-items: center;
+}
+
+.tooltip-bar-label,
+.tooltip-bar-value {
+  font-size: 12px;
+  color: rgba(255,255,255,0.84);
+}
+
+.tooltip-bar-track {
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.08);
+}
+
+.tooltip-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.tooltip-footer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  font-size: 12px;
+  color: rgba(255,255,255,0.72);
+  display: grid;
+  gap: 4px;
+}
+
+.streaming-map-tooltip {
+  position: absolute;
+  background: rgba(12, 12, 18, 0.92);
+  color: #f0ede8;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 12px;
+  line-height: 1.5;
+  pointer-events: none;
+  min-width: 200px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+  z-index: 10;
+}
+
+.streaming-map-tooltip.hidden {
+  display: none;
+}
+
+.streaming-map-svg text {
+  fill: #f3f3f3;
+  font-family: sans-serif;
 }
