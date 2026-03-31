@@ -1531,3 +1531,140 @@ Map
   fill: #f3f3f3;
   font-family: sans-serif;
 }
+
+
+
+/* ══════════════════════════════════════════
+   SCROLL OVERRIDE — replaces old snap system
+   Add these at the bottom of style.css
+   ══════════════════════════════════════════ */
+
+html, body {
+  height: auto !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  scroll-snap-type: none !important;
+}
+
+/* Old snap container no longer used */
+.scroll-landing {
+  display: contents !important;
+  height: auto !important;
+  overflow: visible !important;
+  scroll-snap-type: none !important;
+}
+
+/* Old snap sections no longer used */
+.snap-section {
+  height: auto !important;
+  min-height: unset !important;
+  scroll-snap-align: none !important;
+  scroll-snap-stop: unset !important;
+}
+
+/* Old overlays completely hidden */
+.overlay-page {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+
+
+.viz-container {
+  background: #0a1628 !important;
+}
+
+
+
+
+
+/* Genre playoffs dark theme overrides */
+.genre-playoff-card,
+.genre-pool-card,
+.genre-fly-card {
+  color: #fff !important;
+}
+
+.genre-playoff-name,
+.genre-fly-name {
+  color: #fff !important;
+}
+
+.genre-playoff-meta,
+.genre-playoff-hint,
+.genre-fly-meta {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.genre-playoff-count {
+  color: #fff !important;
+}
+
+.genre-playoffs-round-label {
+  color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.genre-playoffs-step,
+.genre-playoffs-click-tip {
+  color: rgba(255, 255, 255, 0.8) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.genre-drop-slot {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.genre-slot-placeholder {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.genre-slot-placeholder.winner {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.genre-playoffs-button.secondary {
+  color: rgba(255, 255, 255, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.genre-playoff-connector {
+  stroke: rgba(255, 255, 255, 0.25) !important;
+}
+
+
+
+
+
+/* Genre-language alluvial dark theme */
+#viz-genre-lang svg text {
+  fill: #fff !important;
+}
+
+.gl-pill {
+  color: rgba(255, 255, 255, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.gl-pill:hover {
+  color: #c9a84c !important;
+  border-color: #c9a84c !important;
+}
+
+
+
+
+/* Language representation dark theme */
+.waffle-legend-item {
+  color: #fff !important;
+}
+
+.waffle-decade-label {
+  color: #fff !important;
+}
+
+.waffle-total {
+  color: rgba(255, 255, 255, 0.5) !important;
+}

@@ -1,319 +1,894 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta name="description" content="Streaming and Global Media Visibility">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title> Streaming and Global Media Visibility</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Streaming and Global Media Visibility">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Streaming and Global Media Visibility</title>
 
-	<!-- Load CSS libraries -->
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/cinematic-effects.css">
 
-	<!-- Google Fonts -->
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-	<!-- Custom CSS -->
-	<link rel="stylesheet" href="css/style.css">
+    :root {
+      --c-bg:       #0d0d0f;
+      --c-surface:  #111114;
+      --c-border:   rgba(255,255,255,0.08);
+      --c-text:     rgba(255,255,255,0.88);
+      --c-muted:    rgba(255,255,255,0.42);
+      --c-accent:   rgba(255,255,255,0.18);
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans:  'DM Sans', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--c-bg);
+      color: var(--c-text);
+      font-family: var(--font-sans);
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    /* ── Global particle canvas (persists across all sections) ── */
+    #global-particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Floating genre words (intro only, managed by JS) ── */
+    #genre-floats {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .genre-float {
+      position: absolute;
+      font-family: var(--font-serif);
+      font-weight: 300;
+      font-style: italic;
+      color: rgba(255,255,255,0.10);
+      white-space: nowrap;
+      letter-spacing: 0.08em;
+      animation: floatUp linear forwards;
+      pointer-events: none;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(0) translateX(0); opacity: 0; }
+      8%   { opacity: 1; }
+      88%  { opacity: 1; }
+      100% { transform: translateY(-110px) translateX(15px); opacity: 0; }
+    }
+
+    /* ── Film strip ── */
+    .film-strip {
+      position: fixed;
+      left: 0; right: 0;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      opacity: 0.12;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .film-strip.top { top: 0; }
+    .film-strip.bot { bottom: 0; }
+    .film-hole  { flex-shrink: 0; width: 20px; height: 12px; border: 1px solid #aaa; border-radius: 2px; margin: 0 5px; }
+    .film-frame { flex-shrink: 0; width: 40px; height: 28px; border: 1px solid #666; }
+
+    /* ── Persistent top nav dots ── */
+    #section-nav {
+      position: fixed;
+      right: 22px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .nav-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .nav-dot.active {
+      background: rgba(255,255,255,0.85);
+      transform: scale(1.5);
+    }
+    .nav-dot:hover { background: rgba(255,255,255,0.6); }
+
+    /* ── Scan line ── */
+    .scan-line {
+      position: fixed;
+      left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent);
+      animation: scanDown 7s linear infinite;
+      pointer-events: none;
+      z-index: 1;
+    }
+    @keyframes scanDown { 0% { top: 0%; } 100% { top: 100%; } }
+
+    /* ══════════════════════════════════
+       SECTIONS
+    ══════════════════════════════════ */
+
+    section {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 40px;
+    }
+
+    /* Section separators */
+    section + section {
+      border-top: 1px solid var(--c-border);
+    }
+
+    /* ── § 0  Hero / Title ── */
+    #sec-title {
+      text-align: center;
+      padding: 0 40px;
+    }
+
+    .hero-spotlight {
+      position: absolute;
+      top: -160px; left: 50%;
+      transform: translateX(-50%);
+      width: 700px; height: 700px;
+      background: radial-gradient(ellipse at center, rgba(255,255,255,0.055) 0%, transparent 68%);
+      pointer-events: none;
+      animation: pulse 5s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity:.7; } 50% { opacity:1; } }
+
+    .corner-mark {
+      position: absolute;
+      width: 44px; height: 44px;
+      opacity: 0.16;
+    }
+    .corner-mark.tl { top: 52px; left: 28px; border-top: 1px solid #fff; border-left: 1px solid #fff; }
+    .corner-mark.tr { top: 52px; right: 28px; border-top: 1px solid #fff; border-right: 1px solid #fff; }
+    .corner-mark.bl { bottom: 52px; left: 28px; border-bottom: 1px solid #fff; border-left: 1px solid #fff; }
+    .corner-mark.br { bottom: 52px; right: 28px; border-bottom: 1px solid #fff; border-right: 1px solid #fff; }
+
+    .course-pill {
+      font-family: var(--font-sans);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      color: var(--c-muted);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.3s forwards;
+    }
+
+    .hero-title {
+      font-family: var(--font-serif);
+      font-size: clamp(44px, 7vw, 72px);
+      font-weight: 300;
+      line-height: 1.08;
+      color: #fff;
+      letter-spacing: -0.01em;
+      opacity: 0;
+      animation: fadeUp 1.1s ease 0.6s forwards;
+    }
+    .hero-title em { font-style: italic; color: rgba(255,255,255,0.55); }
+
+    .hero-divider {
+      width: 0; height: 1px;
+      background: rgba(255,255,255,0.28);
+      margin: 26px auto;
+      animation: expandW 1s ease 1.3s forwards;
+    }
+    @keyframes expandW { to { width: 110px; } }
+
+    .hero-sub {
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      color: var(--c-muted);
+      opacity: 0;
+      animation: fadeUp 1s ease 1.5s forwards;
+    }
+
+    .genre-tags {
+      display: flex;
+      gap: 9px;
+      margin-top: 32px;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 520px;
+    }
+    .genre-tag {
+      font-family: var(--font-sans);
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.16em;
+      color: rgba(255,255,255,0.45);
+      border: 0.5px solid rgba(255,255,255,0.14);
+      padding: 5px 13px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      opacity: 0;
+    }
+    .genre-tag:nth-child(1) { animation: tagPop 0.45s ease 1.9s forwards; }
+    .genre-tag:nth-child(2) { animation: tagPop 0.45s ease 2.05s forwards; }
+    .genre-tag:nth-child(3) { animation: tagPop 0.45s ease 2.2s forwards; }
+    .genre-tag:nth-child(4) { animation: tagPop 0.45s ease 2.35s forwards; }
+    .genre-tag:nth-child(5) { animation: tagPop 0.45s ease 2.5s forwards; }
+    .genre-tag:nth-child(6) { animation: tagPop 0.45s ease 2.65s forwards; }
+    .genre-tag:nth-child(7) { animation: tagPop 0.45s ease 2.8s forwards; }
+
+    .team-block {
+      margin-top: 44px;
+      border-top: 1px solid var(--c-border);
+      padding-top: 22px;
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+      animation: fadeUp 1s ease 3s forwards;
+    }
+    .team-block span {
+      font-family: var(--font-serif);
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--c-muted);
+      letter-spacing: 0.04em;
+    }
+
+    .scroll-cue {
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--c-muted);
+      opacity: 0;
+      animation: fadeUp 1s ease 3.4s forwards;
+      cursor: default;
+    }
+    .scroll-cue span {
+      font-family: var(--font-sans);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .scroll-arrow {
+      width: 1px;
+      height: 36px;
+      background: rgba(255,255,255,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    .scroll-arrow::after {
+      content: '';
+      position: absolute;
+      top: -36px; left: 0;
+      width: 1px; height: 36px;
+      background: rgba(255,255,255,0.7);
+      animation: slideDown 1.6s ease-in-out infinite;
+    }
+    @keyframes slideDown { 0% { top: -36px; } 100% { top: 36px; } }
+
+    /* ── § 1  Story Overview ── */
+    #sec-story {
+      background: transparent;
+    }
+    .story-inner {
+      max-width: 760px;
+      text-align: center;
+    }
+    .section-label {
+      font-family: var(--font-sans);
+      font-size: 10px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: clamp(32px, 4.5vw, 52px);
+      font-weight: 300;
+      line-height: 1.1;
+      color: #fff;
+      margin-bottom: 24px;
+    }
+    .section-title em { font-style: italic; color: rgba(255,255,255,0.5); }
+    .section-body {
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 300;
+      line-height: 1.8;
+      color: var(--c-muted);
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    /* Story arc cards */
+    .arc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 48px;
+      width: 100%;
+      max-width: 860px;
+    }
+    .arc-card {
+      border: 0.5px solid var(--c-border);
+      border-radius: 10px;
+      padding: 20px 18px;
+      cursor: pointer;
+      transition: border-color 0.3s, background 0.3s, transform 0.25s;
+      position: relative;
+      overflow: hidden;
+      background: rgba(255,255,255,0.02);
+    }
+    .arc-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent, rgba(255,255,255,0.2));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .arc-card:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); transform: translateY(-3px); }
+    .arc-card:hover::before { opacity: 1; }
+    .arc-stage {
+      font-family: var(--font-sans);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      margin-bottom: 10px;
+      display: block;
+    }
+    .arc-name {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      font-weight: 400;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .arc-desc {
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 300;
+      color: var(--c-muted);
+      line-height: 1.5;
+    }
+
+    /* ── Viz Sections ── */
+    .viz-section {
+      min-height: 100vh;
+      padding: 80px 40px 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .viz-header {
+      width: 100%;
+      max-width: 1100px;
+      margin-bottom: 32px;
+    }
+    .viz-number {
+      font-family: var(--font-serif);
+      font-size: 80px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.05);
+      line-height: 1;
+      position: absolute;
+      top: 60px;
+      left: 40px;
+      pointer-events: none;
+      user-select: none;
+    }
+    .viz-title {
+      font-family: var(--font-serif);
+      font-size: clamp(28px, 3.5vw, 44px);
+      font-weight: 300;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    .viz-subtitle {
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--c-muted);
+      line-height: 1.7;
+      max-width: 680px;
+    }
+    .viz-subtitle strong {
+      color: rgba(255,255,255,0.7);
+      font-weight: 400;
+    }
+
+    /* Expandable about */
+    .viz-explanation {
+      margin-top: 12px;
+    }
+    .viz-explanation-toggle {
+      background: none;
+      border: 0.5px solid var(--c-border);
+      color: var(--c-muted);
+      font-family: var(--font-sans);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .viz-explanation-toggle:hover { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.7); }
+    .viz-explanation-body { display: none; }
+    .viz-explanation.open .viz-explanation-body { display: block; }
+    .viz-explanation-body-inner {
+      margin-top: 12px;
+      padding: 16px 20px;
+      border: 0.5px solid var(--c-border);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.025);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 300;
+      color: var(--c-muted);
+      line-height: 1.75;
+      max-width: 680px;
+    }
+
+    /* Viz container */
+    .viz-container {
+      width: 100%;
+      max-width: 1100px;
+      min-height: 480px;
+      border: 0.5px solid var(--c-border);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.018);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .placeholder-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 18px;
+      color: var(--c-muted);
+    }
+
+    /* Sidebar layout */
+    .viz-layout {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+      max-width: 1100px;
+      align-items: flex-start;
+    }
+    .viz-layout .viz-container { flex: 1; min-width: 0; }
+    .viz-sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      border: 0.5px solid var(--c-border);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.018);
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .viz-sidebar label {
+      font-family: var(--font-sans);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      display: block;
+      margin-bottom: 8px;
+    }
+    .viz-sidebar select,
+    .viz-sidebar input[type="range"] {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--c-border);
+      color: var(--c-text);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-family: var(--font-sans);
+      font-size: 12px;
+    }
+    .viz-sidebar span {
+      font-size: 12px;
+      color: var(--c-muted);
+    }
+
+    /* ── § Conclusion ── */
+    #sec-conclusion {
+      min-height: 60vh;
+      background: transparent;
+    }
+    .conclusion-inner {
+      max-width: 700px;
+      text-align: center;
+    }
+    .conclusion-divider {
+      width: 60px; height: 1px;
+      background: rgba(255,255,255,0.2);
+      margin: 20px auto;
+    }
+    .conclusion-body {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.75;
+      color: rgba(255,255,255,0.55);
+    }
+
+    /* Footer */
+    footer {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 32px 40px 48px;
+      border-top: 1px solid var(--c-border);
+    }
+    footer p {
+      font-family: var(--font-sans);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.2);
+      text-transform: uppercase;
+    }
+
+    /* ── Scroll-reveal utility ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.32s; }
+    .reveal-delay-4 { transition-delay: 0.44s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes tagPop {
+      0%   { transform: scale(0.82); opacity: 0; }
+      60%  { transform: scale(1.07); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
 </head>
 
 <body>
 
-<!-- ─── Scroll-snap landing: Title + Hub ─── -->
-<div class="scroll-landing" id="scroll-landing">
+<!-- Global ambient layer -->
+<canvas id="global-particles"></canvas>
+<div id="genre-floats"></div>
+<div class="film-strip top" id="strip-top"></div>
+<div class="film-strip bot" id="strip-bot"></div>
+<div class="scan-line"></div>
 
-	<!-- Page 0 — Title -->
-	<section class="snap-section" data-page="0">
-		<div class="page-content title-page">
-			<div class="title-wrapper">
-				<span class="course-code">CSC316</span>
-				<h1 class="main-title">Streaming and Global Media Visibility</h1>
-				<div class="subtitle">An Analysis of Content Patterns on Major Streaming Platforms</div>
-			</div>
+<!-- Side navigation dots -->
+<nav id="section-nav" aria-label="Section navigation">
+  <div class="nav-dot active" data-target="sec-title"   title="Title"></div>
+  <div class="nav-dot"        data-target="sec-story"   title="Our Story"></div>
+  <div class="nav-dot"        data-target="sec-viz1"    title="Genre Playoffs"></div>
+  <div class="nav-dot"        data-target="sec-viz2"    title="Language Representation"></div>
+  <div class="nav-dot"        data-target="sec-viz3"    title="Genre & Language"></div>
+  <div class="nav-dot"        data-target="sec-viz4"    title="Budget vs Revenue"></div>
+  <div class="nav-dot"        data-target="sec-viz5"    title="Streaming Map"></div>
+  <div class="nav-dot"        data-target="sec-conclusion" title="Conclusion"></div>
+</nav>
 
-			<div class="team-section">
-				<div class="team-label">Team</div>
-				<ul class="team-members">
-					<li>Jacob DeSousa</li>
-					<li>Maryam Hassan</li>
-					<li>Polina Vladymyrska</li>
-					<li>Aroush Syed</li>
-					<li>Mila Bhaloo</li>
-				</ul>
-			</div>
 
-			<div class="course-info">
-				<span>University of Toronto</span>
-				<span class="separator">·</span>
-				<span>Winter 2026</span>
-			</div>
-		</div>
+<!-- ══════════════════════════════════════
+     § 0  HERO / TITLE
+══════════════════════════════════════ -->
+<section id="sec-title">
+  <div class="hero-spotlight"></div>
+  <div class="corner-mark tl"></div>
+  <div class="corner-mark tr"></div>
+  <div class="corner-mark bl"></div>
+  <div class="corner-mark br"></div>
 
-		<button class="scroll-hint" type="button" onclick="scrollToLandingSection('1')">
-			<span class="scroll-hint-label">Story Map</span>
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="24" height="24">
-				<path d="M6 9l6 6 6-6"/>
-			</svg>
-		</button>
-	</section>
+  <div class="course-pill">CSC316 · University of Toronto · Winter 2026</div>
 
-	<!-- Page 1 — Story Map Hub -->
-	<section class="snap-section" data-page="1">
-		<div class="page-content story-hub-page">
-			<h2 class="hub-title">Our Data Story</h2>
-			<p class="hub-insight">Streaming platforms showcase diverse genres, but not truly diverse production. By comparing genre, language, and location, this project shows that global catalogs are dominated by a few regions and languages. The visualizations presented uncover this gap, pointing to an untapped opportunity for growth in audience reach and content investment in underrepresented regions.</p>
+  <h1 class="hero-title">
+    Streaming &amp; Global<br>
+    <em>Media Visibility</em>
+  </h1>
 
-			<div class="hub-arc" id="hub-arc">
-				<svg class="hub-connectors" id="hub-connectors" preserveAspectRatio="xMidYMid meet"></svg>
+  <div class="hero-divider"></div>
+  <p class="hero-sub">An Analysis of Content Patterns on Major Streaming Platforms</p>
 
-				<div class="hub-grid">
-					<div class="hub-node hub-pos-hook" style="--node-accent:#C45D3A" onclick="goToPage(2)" data-hub-id="hook">
-						<span class="hub-stage">Hook</span>
-						<span class="hub-viz-name">Genre Playoffs</span>
-						<span class="hub-desc">Explore genre popularity &amp; meet top directors</span>
-					</div>
+  <div class="genre-tags">
+    <span class="genre-tag">Drama</span>
+    <span class="genre-tag">Comedy</span>
+    <span class="genre-tag">Action</span>
+    <span class="genre-tag">Documentary</span>
+    <span class="genre-tag">Thriller</span>
+    <span class="genre-tag">Romance</span>
+    <span class="genre-tag">Animation</span>
+  </div>
 
-					<div class="hub-node hub-pos-ri1" style="--node-accent:#4db89e" onclick="goToPage(4)" data-hub-id="ri1">
-						<span class="hub-stage">Rising Insight</span>
-						<span class="hub-viz-name">Language Representation</span>
-						<span class="hub-desc">Language diversity on streaming over time</span>
-					</div>
+  <div class="team-block">
+    <span>Jacob DeSousa</span>
+    <span>Maryam Hassan</span>
+    <span>Polina Vladymyrska</span>
+    <span>Aroush Syed</span>
+    <span>Mila Bhaloo</span>
+  </div>
 
-					<div class="hub-node hub-pos-ri2" style="--node-accent:#4db89e" onclick="goToPage(5)" data-hub-id="ri2">
-						<span class="hub-stage">Rising Insight</span>
-						<span class="hub-viz-name">Genre &amp; Language</span>
-						<span class="hub-desc">How genres connect to languages of origin</span>
-					</div>
-
-					<div class="hub-node hub-pos-aha" style="--node-accent:#c9a84c" onclick="goToPage(6)" data-hub-id="aha">
-						<span class="hub-stage">Aha Moment</span>
-						<span class="hub-viz-name">Budget vs Revenue</span>
-						<span class="hub-desc">Genre &amp; language trends drive ROI</span>
-					</div>
-
-					<div class="hub-node hub-pos-res" style="--node-accent:#4a7ec9" onclick="goToPage(7)" data-hub-id="res">
-						<span class="hub-stage">Resolution</span>
-						<span class="hub-viz-name">Global Streaming Map</span>
-						<span class="hub-desc">Platform catalogs around the world</span>
-					</div>
-				</div>
-			</div>
-
-		</div>
-
-		<button class="scroll-hint" type="button" onclick="scrollToLandingSection('conclusion')">
-			<span class="scroll-hint-label">Conclusion</span>
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="24" height="24">
-				<path d="M6 9l6 6 6-6"/>
-			</svg>
-		</button>
-	</section>
-
-	<!-- Page 2 (scroll) — Conclusion -->
-	<section class="snap-section conclusion-section" data-page="conclusion">
-		<div class="page-content conclusion-page"><span class="course-code">Conclusion</span>
-			<h2 class="conclusion-title">What the Data Told Us</h2>
-			<div class="conclusion-divider"></div>
-			<p class="conclusion-body">
-				Streaming platforms create the appearance of global diversity, but our visualizations show a different reality. Across genres, the same languages and production regions continue to dominate what audiences see. At the same time, large, underrepresented markets show clear audience demand and revenue potential. This gap suggests that the future of streaming isn’t just about more content, but about expanding whose stories are produced, distributed, and scaled globally.
-			</p>
-		</div>
-	</section>
-</div>
-
-<!-- ─── Overlay viz pages (fixed, toggled via JS) ─── -->
-
-<!-- Page 2 — Genre Playoffs (Hook) -->
-<section class="overlay-page" data-page="2">
-	<button class="hub-back-btn" onclick="goToStoryHub()">
-		<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
-		Story Map
-	</button>
-	<button class="viz-nav viz-nav-next" onclick="goToPage(4)">
-		Language Representation
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M9 6l6 6-6 6"/></svg>
-	</button>
-	<div class="page-content viz-page genre-playoffs-page">
-		<h2 class="viz-title">Genre Playoffs</h2>
-		<p class="viz-subtitle" >Drag genres into the bracket, or press the <strong>"Randomize Brackets"</strong> button, then click <strong>"Reveal Winners"</strong> to see which genre produces the most titles.</p>
-		<p class="viz-subtitle">Hover for country and language context. <strong>Click a genre card to open its top directors.</strong></p>
-		<div class="viz-explanation">
-			<button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
-				About this visualization
-			</button>
-			<div class="viz-explanation-body"><div class="viz-explanation-body-inner">
-				<p>This bracket-style visualization compares the relative production of films and TV series based on genres. While it highlights genre variety on global streaming platforms, hovering over each country reveals that most genres are still dominated by the same production hubs and languages, raising questions about the gap in global diversity.</p>
-			</div></div>
-		</div>
-		<div class="viz-container genre-playoffs-viz" id="viz-1">
-			<p class="placeholder-text">Loading genre playoffs...</p>
-		</div>
-	</div>
+  <div class="scroll-cue">
+    <span>Scroll</span>
+    <div class="scroll-arrow"></div>
+  </div>
 </section>
 
-<!-- Page 4 — Language Representation -->
-<section class="overlay-page" data-page="4">
-	<button class="hub-back-btn" onclick="goToStoryHub()">
-		<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
-		Story Map
-	</button>
-	<button class="viz-nav viz-nav-prev" onclick="goToPage(2)">
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M15 6l-6 6 6 6"/></svg>
-		Genre Playoffs
-	</button>
-	<button class="viz-nav viz-nav-next" onclick="goToPage(5)">
-		Genre &amp; Language
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M9 6l6 6-6 6"/></svg>
-	</button>
-	<div class="page-content viz-page">
-		<h2 class="viz-title">Language Representation Over Time</h2>
-		<p class="viz-subtitle">Hover over a <strong>decade column</strong> to see language breakdown. Each square represents a share of titles from that period.</p>
-		<div class="viz-explanation">
-			<button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
-				About this visualization
-			</button>
-			<div class="viz-explanation-body"><div class="viz-explanation-body-inner">
-				<p>For decades, English was the default language of all media, and the stories that reached the world were usually almost American or British. But scroll through Netflix today, and it is completely different.
-					This visualization tracks the language origins of streaming content across four decades: the 1980s through the 2010s. Each small square represents a portion of titles from that decade. The pattern that emerges is that English is still the dominant language, but it's so much less so. South Asian and East Asian content has grown substantially since the 1980s, reflecting the rise of Bollywood, Korean Dramas, and anime. Spanish-language content has also grown alongside Arabic and Turkish titles.</p>
-			</div></div>
-		</div>
-		<div class="viz-container" id="viz-language">
-			<p class="placeholder-text">Loading visualization...</p>
-		</div>
-	</div>
+
+<!-- ══════════════════════════════════════
+     § 1  STORY OVERVIEW
+══════════════════════════════════════ -->
+<section id="sec-story">
+  <div class="story-inner reveal">
+    <p class="section-label">Our Data Story</p>
+    <h2 class="section-title">The Gap Behind <em>Global Catalogs</em></h2>
+    <p class="section-body">
+      Streaming platforms showcase diverse genres, but not truly diverse production. By comparing genre, language, and location, this project shows that global catalogs are dominated by a few regions and languages — and points to an untapped opportunity for growth in underrepresented regions.
+    </p>
+  </div>
+
+  <div class="arc-grid">
+    <div class="arc-card reveal reveal-delay-1" style="--accent:#C45D3A" onclick="smoothScrollTo('sec-viz1')">
+      <span class="arc-stage">Hook</span>
+      <span class="arc-name">Genre Playoffs</span>
+      <p class="arc-desc">Explore genre popularity &amp; meet top directors</p>
+    </div>
+    <div class="arc-card reveal reveal-delay-2" style="--accent:#4db89e" onclick="smoothScrollTo('sec-viz2')">
+      <span class="arc-stage">Rising Insight</span>
+      <span class="arc-name">Language Representation</span>
+      <p class="arc-desc">Language diversity on streaming over time</p>
+    </div>
+    <div class="arc-card reveal reveal-delay-3" style="--accent:#4db89e" onclick="smoothScrollTo('sec-viz3')">
+      <span class="arc-stage">Rising Insight</span>
+      <span class="arc-name">Genre &amp; Language</span>
+      <p class="arc-desc">How genres connect to languages of origin</p>
+    </div>
+    <div class="arc-card reveal reveal-delay-4" style="--accent:#c9a84c" onclick="smoothScrollTo('sec-viz4')">
+      <span class="arc-stage">Aha Moment</span>
+      <span class="arc-name">Budget vs Revenue</span>
+      <p class="arc-desc">Genre &amp; language trends drive ROI</p>
+    </div>
+    <div class="arc-card reveal reveal-delay-4" style="--accent:#4a7ec9" onclick="smoothScrollTo('sec-viz5')">
+      <span class="arc-stage">Resolution</span>
+      <span class="arc-name">Global Streaming Map</span>
+      <p class="arc-desc">Platform catalogs around the world</p>
+    </div>
+  </div>
 </section>
 
-<!-- Page 5 — Genre–Language Alluvial -->
-<section class="overlay-page" data-page="5">
-	<button class="hub-back-btn" onclick="goToStoryHub()">
-		<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
-		Story Map
-	</button>
-	<button class="viz-nav viz-nav-prev" onclick="goToPage(4)">
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M15 6l-6 6 6 6"/></svg>
-		Language Representation
-	</button>
-	<button class="viz-nav viz-nav-next" onclick="goToPage(6)">
-		Budget vs Revenue
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M9 6l6 6-6 6"/></svg>
-	</button>
-	<div class="page-content viz-page">
-		<h2 class="viz-title">Genre &amp; Language Connections</h2>
-		<p class="viz-subtitle"><strong>Click a genre</strong> to isolate its language breakdown. Toggle <strong>"Exclude English"</strong> to reveal what the rest of the world is making. Flow width shows number of films.</p>
-		<div class="viz-explanation">
-			<button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
-				About this visualization
-			</button>
-			<div class="viz-explanation-body"><div class="viz-explanation-body-inner">
-				<p>Every genre has a language it calls home. Drama and Comedy produce the most titles overall, but the story becomes more interesting when you trace where that content actually comes from. English dominates across nearly every genre — not because other languages lack the stories, but because the industry has historically concentrated production in a small number of markets.</p>
-				<p></p>
-				<p>→ Select a genre from the dropdown to isolate its language breakdown. </p>
-                <p>→ Toggle English off to see what the rest of the world is making.</p>
-			</div></div>
-		</div>
-		<div class="viz-layout">
-			<div class="viz-container" id="viz-genre-lang" style="height:auto; min-height:520px;">
-				<p class="placeholder-text">Loading visualization...</p>
-			</div>
-			<div class="viz-sidebar" id="gl-sidebar"></div>
-		</div>
-	</div>
+
+<!-- ══════════════════════════════════════
+     § 2  GENRE PLAYOFFS
+══════════════════════════════════════ -->
+<section id="sec-viz1" class="viz-section">
+
+  <div class="viz-header reveal">
+    
+
+    <p class="viz-subtitle">
+      Drag genres into the bracket, or press <strong>"Randomize Brackets"</strong>, then click <strong>"Reveal Winners"</strong> to see which genre produces the most titles.
+      Hover for country and language context. <strong>Click a genre card to open its top directors.</strong>
+    </p>
+    <div class="viz-explanation">
+      <button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M6 9l6 6 6-6"/></svg>
+        About this visualization
+      </button>
+      <div class="viz-explanation-body"><div class="viz-explanation-body-inner">
+        <p>This bracket-style visualization compares the relative production of films and TV series based on genres. While it highlights genre variety on global streaming platforms, hovering over each country reveals that most genres are still dominated by the same production hubs and languages, raising questions about the gap in global diversity.</p>
+      </div></div>
+    </div>
+  </div>
+  <div class="viz-container reveal" id="viz-1">
+    <p class="placeholder-text">Loading genre playoffs…</p>
+  </div>
 </section>
 
-<!-- Page 6 — Revenue vs Budget -->
-<section class="overlay-page" data-page="6">
-	<button class="hub-back-btn" onclick="goToStoryHub()">
-		<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
-		Story Map
-	</button>
-	<button class="viz-nav viz-nav-prev" onclick="goToPage(5)">
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M15 6l-6 6 6 6"/></svg>
-		Genre &amp; Language
-	</button>
-	<button class="viz-nav viz-nav-next" onclick="goToPage(7)">
-		Streaming Map
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M9 6l6 6-6 6"/></svg>
-	</button>
-	<div class="page-content viz-page">
-		<h2 class="viz-title">Budget vs Revenue</h2>
-		<p class="viz-subtitle">Use the <strong>slider</strong> to zoom into a budget range. <strong>Hover over lines</strong> to see each film's ROI. Filter by genre or language in the sidebar.</p>
-		<div class="viz-explanation">
-			<button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
-				About this visualization
-			</button>
-			<div class="viz-explanation-body"><div class="viz-explanation-body-inner">
-				<p>Not every big budget pays off. Studios routinely pour hundreds of millions into sequels and blockbusters, assuming bigger spectacle means bigger returns — but the data tells a more complicated story. Some of the most expensive films ever made barely broke even, while modestly budgeted productions quietly returned many times their cost. Genre matters more than spending. Drama and Fantasy consistently deliver the highest ROI, often outperforming the Action films that dominate by sheer volume. English-language productions lead on total revenue, but that advantage narrows when measured by return — smaller films in unexpected languages occasionally punch far above their weight. </p>
-				<p> → Use the budget slider to zoom into any spending range and see who actually won.</p>
-			</div></div>
-		</div>
-		<div class="viz-layout">
-			<div class="viz-container arrow-chart-container" id="viz-4">
-				<p class="placeholder-text">Loading visualization...</p>
-			</div>
-			<div class="viz-sidebar" id="rb-sidebar"></div>
-		</div>
-	</div>
+
+<!-- ══════════════════════════════════════
+     § 3  LANGUAGE REPRESENTATION
+══════════════════════════════════════ -->
+<section id="sec-viz2" class="viz-section">
+
+  <div class="viz-header reveal">
+   
+    
+    <p class="viz-subtitle">
+      Hover over a <strong>decade column</strong> to see language breakdown. Each square represents a share of titles from that period.
+    </p>
+    <div class="viz-explanation">
+      <button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M6 9l6 6 6-6"/></svg>
+        About this visualization
+      </button>
+      <div class="viz-explanation-body"><div class="viz-explanation-body-inner">
+        <p>For decades, English was the default language of all media. But scroll through Netflix today and it looks completely different. This visualization tracks the language origins of streaming content across four decades — the 1980s through the 2010s. The pattern that emerges is that English is still dominant, but much less so. South Asian and East Asian content has grown substantially, reflecting the rise of Bollywood, Korean Dramas, and anime.</p>
+      </div></div>
+    </div>
+  </div>
+  <div class="viz-container reveal" id="viz-language">
+    <p class="placeholder-text">Loading visualization…</p>
+  </div>
 </section>
 
-<!-- Page 7 — Streaming Map -->
-<section class="overlay-page" data-page="7">
-	<button class="hub-back-btn" onclick="goToStoryHub()">
-		<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
-		Story Map
-	</button>
-	<button class="viz-nav viz-nav-prev" onclick="goToPage(6)">
-		<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16"><path d="M15 6l-6 6 6 6"/></svg>
-		Budget vs Revenue
-	</button>
-	<div class="page-content viz-page">
-		<h2 class="viz-title">Platform Dominance in Global Streaming Catalogs</h2>
-		<p class="viz-subtitle">Use the <strong>sidebar filters</strong> to switch platform, content type, or release year. <strong>Hover a country</strong> to see its catalog breakdown.</p>
-		<div class="viz-explanation">
-			<button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
-				<svg viewBox="0 0 24 24" fill="none" strtoke="currentColor" stroke-width="2" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
-				About this visualization
-			</button>
-			<div class="viz-explanation-body"><div class="viz-explanation-body-inner">
-				<p> Streaming platforms distribute content globally, but producing it remains a regional affair. This visualization maps the origins of titles across Netflix, Amazon Prime, and Disney+, revealing which countries dominate each platform's catalog and where production is concentrated. Pin color shows which platform sources the most content from each country; size reflects total volume. The patterns reinforce a central tension in global streaming: while access has expanded worldwide, the industry's creative output continues to flow from a narrow set of production hubs</p>
-			</div></div>
-		</div>
-		<div class="viz-layout">
-			<div class="viz-container" id="viz-streaming-map" style="height:auto; min-height:520px;">
-				<p class="placeholder-text">Loading visualization...</p>
-			</div>
 
-			<div class="viz-sidebar">
-				
+<!-- ══════════════════════════════════════
+     § 4  GENRE–LANGUAGE ALLUVIAL
+══════════════════════════════════════ -->
+<section id="sec-viz3" class="viz-section">
 
-				<div>
-					<label for="typeFilter">Type</label>
-					<select id="typeFilter">
-						<option value="All">All</option>
-						<option value="TV">TV</option>
-						<option value="Film">Film</option>
-					</select>
-				</div>
-
-				<div>
-					<label for="yearSlider">Release year: <span id="yearLabel">2023</span></label>
-					<input
-						type="range"
-						id="yearSlider"
-						min="2000"
-						max="2023"
-						step="1"
-						value="2023"
-					/>
-				</div>
-			</div>
-		</div>
-	</div>
+  <div class="viz-header reveal">
+ 
+    <p class="viz-subtitle">
+      <strong>Click a genre</strong> to isolate its language breakdown. Toggle <strong>"Exclude English"</strong> to reveal what the rest of the world is making. Flow width shows number of films.
+    </p>
+    <div class="viz-explanation">
+      <button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M6 9l6 6 6-6"/></svg>
+        About this visualization
+      </button>
+      <div class="viz-explanation-body"><div class="viz-explanation-body-inner">
+        <p>Every genre has a language it calls home. Drama and Comedy produce the most titles overall, but the story becomes more interesting when you trace where that content actually comes from. English dominates across nearly every genre — not because other languages lack the stories, but because the industry has historically concentrated production in a small number of markets.</p>
+      </div></div>
+    </div>
+  </div>
+  <div class="viz-layout reveal">
+    <div class="viz-container" id="viz-genre-lang" style="min-height:520px;">
+      <p class="placeholder-text">Loading visualization…</p>
+    </div>
+    <div class="viz-sidebar" id="gl-sidebar"></div>
+  </div>
 </section>
+
+
+<!-- ══════════════════════════════════════
+     § 5  BUDGET VS REVENUE
+══════════════════════════════════════ -->
+<section id="sec-viz4" class="viz-section">
+
+  <div class="viz-header reveal">
+
+    <p class="viz-subtitle">
+      Use the <strong>slider</strong> to zoom into a budget range. <strong>Hover over lines</strong> to see each film's ROI. Filter by genre or language in the sidebar.
+    </p>
+    <div class="viz-explanation">
+      <button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M6 9l6 6 6-6"/></svg>
+        About this visualization
+      </button>
+      <div class="viz-explanation-body"><div class="viz-explanation-body-inner">
+        <p>Not every big budget pays off. Studios routinely pour hundreds of millions into sequels and blockbusters, assuming bigger spectacle means bigger returns — but the data tells a more complicated story. Drama and Fantasy consistently deliver the highest ROI, often outperforming the Action films that dominate by sheer volume. Use the budget slider to zoom into any spending range and see who actually won.</p>
+      </div></div>
+    </div>
+  </div>
+  <div class="viz-layout reveal">
+    <div class="viz-container arrow-chart-container" id="viz-4">
+      <p class="placeholder-text">Loading visualization…</p>
+    </div>
+    <div class="viz-sidebar" id="rb-sidebar"></div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     § 6  STREAMING MAP
+══════════════════════════════════════ -->
+<section id="sec-viz5" class="viz-section">
+  
+  <div class="viz-header reveal">
+
+    <p class="viz-subtitle">
+      Use the <strong>sidebar filters</strong> to switch platform, content type, or release year. <strong>Hover a country</strong> to see its catalog breakdown.
+    </p>
+    <div class="viz-explanation">
+      <button class="viz-explanation-toggle" onclick="this.parentElement.classList.toggle('open')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M6 9l6 6 6-6"/></svg>
+        About this visualization
+      </button>
+      <div class="viz-explanation-body"><div class="viz-explanation-body-inner">
+        <p>Streaming platforms distribute content globally, but producing it remains a regional affair. This visualization maps the origins of titles across Netflix, Amazon Prime, and Disney+, revealing which countries dominate each platform's catalog and where production is concentrated. The patterns reinforce a central tension in global streaming: while access has expanded worldwide, the industry's creative output continues to flow from a narrow set of production hubs.</p>
+      </div></div>
+    </div>
+  </div>
+  <div class="viz-layout reveal">
+    <div class="viz-container" id="viz-streaming-map" style="min-height:520px;">
+      <p class="placeholder-text">Loading visualization…</p>
+    </div>
+    <div class="viz-sidebar">
+      <div>
+        <label for="typeFilter">Type</label>
+        <select id="typeFilter">
+          <option value="All">All</option>
+          <option value="TV">TV</option>
+          <option value="Film">Film</option>
+        </select>
+      </div>
+      <div>
+        <label for="yearSlider">Release year: <span id="yearLabel">2023</span></label>
+        <input type="range" id="yearSlider" min="2000" max="2023" step="1" value="2023" />
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════
+     § 7  CONCLUSION
+══════════════════════════════════════ -->
+<section id="sec-conclusion">
+  <div class="conclusion-inner reveal">
+    <p class="section-label">Conclusion</p>
+    <h2 class="section-title">What the Data Told Us</h2>
+    <div class="conclusion-divider"></div>
+    <p class="conclusion-body">
+      Streaming platforms create the appearance of global diversity, but our visualizations show a different reality. Across genres, the same languages and production regions continue to dominate what audiences see. At the same time, large, underrepresented markets show clear audience demand and revenue potential. This gap suggests that the future of streaming isn't just about more content — but about expanding whose stories are produced, distributed, and scaled globally.
+    </p>
+  </div>
+</section>
+
+
+<footer>
+  <p>CSC316 · University of Toronto · Winter 2026 · Jacob DeSousa · Maryam Hassan · Polina Vladymyrska · Aroush Syed · Mila Bhaloo</p>
+</footer>
+
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
@@ -326,5 +901,10 @@
 <script src="js/streaming_map.js"></script>
 <script src="js/genre_language.js"></script>
 <script src="js/main.js"></script>
+<script src="js/cinematic-effects.js"></script>
 </body>
 </html>
+
+
+
+

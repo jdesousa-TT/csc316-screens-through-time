@@ -10,8 +10,11 @@ const width = container.clientWidth || 1100;
 const height = Math.max(520, Math.round(window.innerHeight * 0.75));
 svg.attr("viewBox", `0 0 ${width} ${height}`);
 
+const baseScale = Math.min(width, height) * 0.39;
+let zoomLevel = 1;
+
 const projection = d3.geoOrthographic()
-  .scale(Math.min(width, height) * 0.39)
+  .scale(baseScale * zoomLevel)
   .translate([width / 2, height / 2 + 18])
   .clipAngle(90);
 
@@ -74,6 +77,12 @@ const countryCoords = {
   "Cambodia": [105, 12.7],
   "Australia": [134, -25], "New Zealand": [172, -42]
 };
+
+function setZoom(nextZoom) {
+  zoomLevel = Math.max(1, Math.min(5, nextZoom)); // min 1x, max 5x
+  projection.scale(baseScale * zoomLevel);
+  refreshAll();
+}
 
 function normalizeType(type) {
   if (type === "TV Show") return "TV";
@@ -175,7 +184,7 @@ function wranglePins() {
 
 // ─── Radius scale ─────────────────────────────────────────────────────────────
 
-const rScale = d3.scaleSqrt().range([5, 22]);
+const rScale = d3.scaleSqrt().range([4, 36]);
 
 // ─── Globe rendering ──────────────────────────────────────────────────────────
 
@@ -208,9 +217,6 @@ function updateGlobePaths() {
 
 function updatePins() {
   wranglePins();
-
-  const maxTotal = d3.max(groupedPins, d => d.total) || 1;
-  rScale.domain([0, maxTotal]);
 
   const visiblePins = groupedPins.filter(d => isVisible(d.coords));
 
@@ -324,7 +330,7 @@ function drawLabels() {
     .attr("class", "hint")
     .attr("x", width / 2)
     .attr("y", 38)
-    .text("Drag to rotate · hover a pin for breakdown");
+    .text("Drag to rotate · hover a pin for breakdown · Use two fingers to zoom");
 
   // Color key
   const legend = labelGroup.append("g")
@@ -356,12 +362,29 @@ function refreshAll() {
   drawLabels();
 }
 
+
+svg.call(
+  d3.zoom()
+    .filter((event) => {
+      return event.type === "wheel";
+    })
+    .scaleExtent([1, 5])
+    .on("zoom", function(event) {
+      event.sourceEvent?.preventDefault();
+      setZoom(event.transform.k);
+    })
+);
+
 let m0, o0;
+
 svg.call(
   d3.drag()
     .on("start", function(event) {
       m0 = [event.x, event.y];
-      o0 = (() => { const r = projection.rotate(); return [-r[0], -r[1]]; })();
+      o0 = (() => {
+        const r = projection.rotate();
+        return [-r[0], -r[1]];
+      })();
     })
     .on("drag", function(event) {
       if (!m0) return;
