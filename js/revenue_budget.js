@@ -2,6 +2,8 @@
  * Revenue vs Budget — Arrow Chart
  * Vertical arrows from budget → revenue, animated, interactive
  * Budget range slider dynamically filters films and rescales Y axis
+ * + Language filter (multi-select pills)
+ * + Avatar excluded (outlier)
  */
 
 // Styles 
@@ -49,6 +51,61 @@ function rbInjectStyles() {
       border-color: #c9a84c;
       color: #fff;
     }
+
+    /* ── Language filter ── */
+    #rb-lang-section {
+      margin-top: 16px;
+    }
+    #rb-lang-label {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: 7px;
+    }
+    #rb-lang-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .rb-lang-pill {
+      padding: 3px 11px;
+      border-radius: 100px;
+      border: 1.5px solid rgba(0,0,0,0.12);
+      background: transparent;
+      font-family: inherit;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      color: #999;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      white-space: nowrap;
+    }
+    .rb-lang-pill:hover { border-color: #7a9ec9; color: #7a9ec9; }
+    .rb-lang-pill.rb-lang-active {
+      background: #7a9ec9;
+      border-color: #7a9ec9;
+      color: #fff;
+    }
+    #rb-lang-all {
+      padding: 3px 11px;
+      border-radius: 100px;
+      border: 1.5px solid rgba(0,0,0,0.12);
+      background: transparent;
+      font-family: inherit;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      color: #999;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    #rb-lang-all:hover { border-color: #7a9ec9; color: #7a9ec9; }
+    #rb-lang-all.rb-lang-all-active {
+      background: #7a9ec9;
+      border-color: #7a9ec9;
+      color: #fff;
+    }
+
     #rb-legend {
       display: flex;
       gap: 14px;
@@ -207,6 +264,9 @@ function rbParseGenres(raw) {
   catch { return []; }
 }
 
+// Titles to exclude as outliers
+const RB_EXCLUDED_TITLES = new Set(['Avatar', 'avatar']);
+
 function rbProcess(rows) {
   return rows
     .map(d => {
@@ -219,6 +279,8 @@ function rbProcess(rows) {
       return { title, budget, revenue, year, genres, lang };
     })
     .filter(d => d.budget >= 10_000_000 && d.revenue > 0)
+    // Exclude outliers like Avatar
+    .filter(d => !RB_EXCLUDED_TITLES.has(d.title))
     .map(d => ({ ...d, isLoss: d.revenue < d.budget, roi: (d.revenue - d.budget) / d.budget * 100 }));
 }
 
@@ -328,6 +390,18 @@ function rbDraw(allFilms) {
   const container = d3.select('#viz-4');
   container.html('');
 
+  // Collect top languages from data (by film count, min 5 films)
+  const langCount = new Map();
+  allFilms.forEach(f => {
+    if (!f.lang) return;
+    langCount.set(f.lang, (langCount.get(f.lang) || 0) + 1);
+  });
+  const topLangCodes = [...langCount.entries()]
+    .filter(([, n]) => n >= 5)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([code]) => code);
+
   // Budget range across all films
   const globalMin = d3.min(allFilms, d => d.budget);
   const globalMax = d3.max(allFilms, d => d.budget);
@@ -337,6 +411,8 @@ function rbDraw(allFilms) {
   let sliderLo = globalMin;
   let sliderHi = globalMax;
   let active    = 'all';
+  // Selected languages: empty set = all languages shown
+  let activeLangs = new Set();
 
   // Render controls into sidebar
   const sidebar = d3.select('#rb-sidebar');
@@ -370,6 +446,46 @@ function rbDraw(allFilms) {
       <span style="color:#c0504a;font-size:16px">↓</span><span>Loss</span>
     </div>
   `);
+
+  // ── Language filter section ──
+  const langSection = sidebar.append('div').attr('id', 'rb-lang-section');
+  langSection.append('div').attr('id', 'rb-lang-label').text('Language');
+
+  const langPillsWrap = langSection.append('div').attr('id', 'rb-lang-pills');
+
+  // "All" pill
+  const allLangBtn = langPillsWrap.append('button')
+    .attr('id', 'rb-lang-all')
+    .attr('class', 'rb-lang-all-active')
+    .text('All');
+
+  allLangBtn.on('click', function () {
+    activeLangs.clear();
+    langPillsWrap.selectAll('.rb-lang-pill').classed('rb-lang-active', false);
+    d3.select(this).classed('rb-lang-all-active', true);
+    refresh(false);
+  });
+
+  // Individual language pills
+  topLangCodes.forEach(code => {
+    langPillsWrap.append('button')
+      .attr('class', 'rb-lang-pill')
+      .attr('data-lang', code)
+      .text(rbLangLabel(code))
+      .on('click', function () {
+        const lang = d3.select(this).attr('data-lang');
+        if (activeLangs.has(lang)) {
+          activeLangs.delete(lang);
+          d3.select(this).classed('rb-lang-active', false);
+        } else {
+          activeLangs.add(lang);
+          d3.select(this).classed('rb-lang-active', true);
+        }
+        // Toggle "All" pill state
+        allLangBtn.classed('rb-lang-all-active', activeLangs.size === 0);
+        refresh(false);
+      });
+  });
 
   // Slider row
   const sliderRow = sidebar.append('div').attr('id', 'rb-slider-row');
@@ -498,7 +614,7 @@ function rbDraw(allFilms) {
   `;
   document.body.appendChild(tt);
 
-  // Refresh: called on slider move or filter click
+  // Refresh: called on slider move, filter click, or language selection
   let isFirstDraw = true;
 
   function refresh(animate) {
@@ -509,10 +625,15 @@ function rbDraw(allFilms) {
     if (active === 'profit') visible = visible.filter(d => !d.isLoss);
     if (active === 'loss')   visible = visible.filter(d => d.isLoss);
 
+    // 3. Apply language filter (if any langs selected)
+    if (activeLangs.size > 0) {
+      visible = visible.filter(d => activeLangs.has(d.lang));
+    }
+
     // Update sidebar insight stats with all visible films (before sampling)
     rbRenderInsights(visible, sidebar);
 
-    // 3. Sample to max 20 for readability
+    // 4. Sample to max 20 for readability
     const data = rbSample(visible, 20);
 
     if (data.length === 0) {
@@ -524,7 +645,7 @@ function rbDraw(allFilms) {
       return;
     }
 
-    // 4. Scales
+    // 5. Scales
     const xScale = d3.scalePoint()
       .domain(data.map(d => d.title))
       .range([0, W]).padding(0.5);
@@ -535,7 +656,7 @@ function rbDraw(allFilms) {
 
     const dur = isFirstDraw ? 0 : 400; // no transition on very first paint (arrows handle their own)
 
-    // 5. Grid
+    // 6. Grid
     gridG.selectAll('*').remove();
     gridG.attr('opacity', 0)
       .call(d3.axisLeft(yScale).ticks(5).tickSize(-W).tickFormat(''))
@@ -545,7 +666,7 @@ function rbDraw(allFilms) {
         .attr('stroke-dasharray','3,4'))
       .transition().duration(500).attr('opacity', 1);
 
-    // 6. Y axis
+    // 7. Y axis
     yAxisG.selectAll('*').remove();
     yAxisG.attr('opacity', 0)
       .call(d3.axisLeft(yScale).ticks(5).tickSize(4).tickFormat(rbFmt))
@@ -553,11 +674,11 @@ function rbDraw(allFilms) {
       .call(ax => ax.selectAll('text').style('font-size','11px').attr('dx','-4'))
       .transition().duration(500).attr('opacity', 1);
 
-    // 7. Baseline
+    // 8. Baseline
     baseline.attr('x1', 0).attr('x2', 0)
       .transition().duration(600).ease(d3.easeCubicOut).attr('x2', W);
 
-    // 8. Films — full redraw
+    // 9. Films — full redraw
     filmsG.selectAll('*').remove();
     xLabelsG.selectAll('*').remove();
 
