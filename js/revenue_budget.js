@@ -267,6 +267,12 @@ function rbParseGenres(raw) {
 // Titles to exclude as outliers
 const RB_EXCLUDED_TITLES = new Set(['Avatar', 'avatar']);
 
+// Normalize language codes that map to the same language
+function rbNormalizeLang(code) {
+  if (code === 'cn') return 'zh';
+  return code;
+}
+
 function rbProcess(rows) {
   return rows
     .map(d => {
@@ -275,7 +281,7 @@ function rbProcess(rows) {
       const title   = (d.title || d.original_title || '').trim() || 'Unknown';
       const year    = (d.release_date || '').slice(0, 4) || '—';
       const genres  = rbParseGenres(d.genres);
-      const lang    = (d.original_language || '').trim();
+      const lang    = rbNormalizeLang((d.original_language || '').trim());
       return { title, budget, revenue, year, genres, lang };
     })
     .filter(d => d.budget >= 10_000_000 && d.revenue > 0)
