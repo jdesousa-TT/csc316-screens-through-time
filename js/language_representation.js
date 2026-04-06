@@ -135,14 +135,14 @@ class LanguageRepresentation {
                         vis.tooltip
                             .style('opacity', 1)
                             .html('<strong>' + lang + '</strong><br/>' + count + ' titles · ' + pct + '%<br/><em style="color:#aaa">' + d.decade + 's</em>')
-                            .style('left', (event.pageX + 14) + 'px')
-                            .style('top',  (event.pageY - 44) + 'px');
+                            .style('left', (event.clientX + 14) + 'px')
+                            .style('top',  (event.clientY - 44) + 'px');
                         d3.select(this).style('outline', '2px solid #1A1A1A');
                     })
                     .on('mousemove', function(event) {
                         vis.tooltip
-                            .style('left', (event.pageX + 14) + 'px')
-                            .style('top',  (event.pageY - 44) + 'px');
+                            .style('left', (event.clientX + 14) + 'px')
+.style('top',  (event.clientY - 44) + 'px');
                     })
                     .on('mouseout', function() {
                         vis.tooltip.style('opacity', 0);
