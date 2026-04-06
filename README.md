@@ -15,7 +15,7 @@ Our goal was to help general viewers better understand how streaming has influen
 
 ## Project Links
 - **Live Website:** https://jdesousa-tt.github.io/csc316-screens-through-time/
-- **Screencast Video:** [Insert video link]
+- **Screencast Video:** https://www.youtube.com/watch?v=VrpXCDcBvqs
 - **Process Book:** https://docs.google.com/document/d/1bipbYutn-_gnqRpFamIXnXLuzbwFkQmxsXdrQR48zHQ/edit?usp=sharing
 
 ## Contents of Submission
